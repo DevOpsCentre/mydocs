@@ -1,0 +1,751 @@
+---
+ RHCSA: 3 years
+  Essential-tools:
+   - BASIC Commands:
+       - basic commands list:
+            - ls
+            - mv
+            - touch
+            - cat
+            - mkdir
+            - rm
+            - cp
+            - vi
+            - vim
+            - man
+            - ifconfig
+            - hostname
+            - hostnamectl
+            - date
+            - timedatectl
+            - cal
+            - history
+            - more
+            - grep
+            - >
+            - >>
+            - <
+            - redirecting error and output:
+               cat file1.txt &> output-file1.txt #&> redirecting output/error or both
+               cat file1.txt 1> output-file1.txt 2>&1 #redirecting error and output
+               cat file1.txt 1> /dev/null 2>&1 #redirecting error and output to null # destroying data
+            - |
+            - wc
+
+       - To see the n/w interfaces:
+             ifconfig
+             ip addr show
+       - To shift from GUI to console: 
+           CTRL+ALT+F1  #GUI
+           CTRL+ALT+F2  #CONSOLE
+           .
+           .
+
+           .
+           CTRL+ALT+F6  #CONSOLE
+       - To see the file system hierarchy:
+           man hier
+       - To see list of files:
+          - to see detailed info of folders/directories and files:
+              ls -l 
+          - to see hidden files:
+              ls -al
+          - to sort the file based on alphabetical order:
+              ls -lr
+          - to sort the file based on  reverse alphabetical order or time created:
+              ls -lrt
+          - to see the files in a tre view:
+              ls -R
+       - To read a file with line numbers:
+             nl file.txt
+             cat -n file.txt    
+         - To read a file with top 10 lines:
+             head file.txt
+         - To read a file with last 10 lines:
+             tail file.txt
+       - To create a folder:
+           mkdir mydata/
+         - To create a folder inside a folder :
+            mkdir -p folder1/folder2    
+         - To create a file:
+            touch file1
+            cat > file2
+            echo "" > file3
+            >file4
+            vi file5
+            vim file6 
+          - To create 100 text files at a time:
+            touch file{1..100}.txt   
+       - To set the hostname:
+              hostnamectl set-hostname <hostname> # ex: hostnamectl set-hostname web.company.com
+       - To see time date and time zone:
+              timedatectl
+       - To set the timezone:
+              timedatectl set-timezone <timezone name>
+              #note: type without quotes 'timedatectl set-timezone' and then hit Tab twice to see list of timezones available
+       - To print time on screen:
+            - to print in 12 hrs format:
+               date +%r
+            - to print in 24 hrs format:
+               date +%R
+       - To print calender on screen:
+            - to print calender of current month:
+               cal 
+            - to print calender of year:
+               cal 2019
+            - to print calender of month:
+               cal 08 2019
+       - To see the list of previous commands executed: 
+          history # by default it stores upto tha last 1000 commands.
+            - to see the history file size:
+               echo $HISTFILESIZE
+            - to set the history file size to (say 2000):
+               echo HISTFILESIZE=2000
+            - to use the commands shown in history:
+                history # and then below command
+                !<command-no> #ex: if we want to run 20th command then # type !20 and hit enter
+            - to show in pages:
+                history | more
+            - to see the last 5 commands run:
+                history 5
+            - to use last command starting with a letter :
+               !c # for command starting with c
+               !w # for command starting with w
+            - to search for a command in history:
+                press CTRL+R on keyboard and start typing
+            - to run the recent last command:
+                !!
+            - to set the print format for history:
+               export HISTTIMEFORMAT='%F %T '
+       - to see the any linux OS version:
+            cat /etc/*-release
+       - to see the redhat OS version:
+           cat /etc/readhat-release
+       - to print the kernel name:
+           uname -s
+       - to print the node name:
+           uname -n 
+       - to see the cpu info:
+           cat /proc/cpuinfo #or lscpu
+       - to see the memory details:
+           cat /proc/meminfo #or free -h 
+       - to see the list of running process:
+           top
+       - to see the virtual memory:
+           vmstat
+       - to see the disk and partions:
+            cat /proc/partitions
+          - to see the file system type:
+             file /dev/sda
+          - to see the disk and partitions:
+            lsblk
+          - to see the detailed view of partitions:
+             fdisk -l 
+          - to see the details of disk file type memory used etc..:
+             df -h
+       - to see the hostname details:
+           hostnamectl
+
+   - Keyboard shortcuts:
+      - CTRL + u  # to clear the command and put the cursor at starting position
+      - CTRL + arrow key # to mov e the cursor tot starting position of the each word
+      - up/down arrow  #to see the previous command run
+      - CTRL + l # to clear the screen
+      - CTRL + k 
+      - CTRL + c # to stop the running process
+      - CTRL + r # to search for previous command
+   - I/O REDIRECTION:
+   - GREP:
+   - access remote systems SSH:
+     ssh: to connect to remote systems 
+      ssh user@IPaddress
+     file transfers:
+       telnet: no security no encryption
+       ftp: no security no encryption
+       scp: scp <file-name> user@IP:~
+       sftp: sftp user@IP 
+        - get: to download file
+        - put: to upload file
+       
+   - LOG-IN AND SWITH USERIN MULTI USER TARGETS:
+   - UN/ARCHIVE , UN/COPMRESS UN/PACK files using tar.gz,star,gzip,bgip/2:
+       - gzip:  
+            #used to compress only files and can't compress directories         
+            create .gz file
+             #to compress files
+             gzip filename
+             #to see compression details
+             gzip -l filename 
+             # to uncompress 
+             gzip -d filename
+        - gunzip :
+           - used to uncompress files
+             gunzip filename
+        - tar: used to compress files and directories
+           #to create a compressed file
+             tar -cvf filename.tar directory/ file1 file2
+           #to view files in tar
+             tar -tvf filename.tar
+           #to untar .tar files
+             tar -xvf filename.tar
+           #to untar tar.gz 
+             tar -xvzf filename.tar
+             # -f filename
+             # -v verbose
+             # -c create archive
+             # -j .bz2
+             # -z gzip
+             # -x extract
+             # -t list the content
+             # -C change dir ex: tar -xvzf abcd.tar.gz -C /home/ # to copy the extracted contetn
+             
+   - create and edit txt files:
+      vi editor  
+       - press i - to go to insert mode
+       
+       - go to x mode and then 
+           - press R to go to REPLACE mode and type on the exisiting chars and it will be replaced
+           - press dd - to cut and then p to paste
+           - press y - to copy the lines and then p to paste
+           - cc to cut the line and go to insert mode
+           - delete a word (dw)
+           - delete a character (x)
+           - delete a line (dd)
+           - copy the last two lines (yy)
+           - paste the lines on the top of the file (p)
+           - Go to the bottom of the page (GG), then go to the top of the page (gg)
+          type colon : and then below
+           :%!fmt #to format the content
+           :u to undo 
+           :/searchword to find the matching lines #ex: if want to find hello in the test then
+           :/hello
+           :set nu  #to show line numbers
+           :10 #to go to line number 10
+           :+line number #to go to next line number ex: :/+50 to go to 55oth line from present line where the cursor exists
+           :%s/hello/how #to replace first occurance of word 'hello' with 'how'
+           :%s/hello/how/g #to replace all occurances in the file
+           :q! #to quit without saving
+           :wq! #to write and close the file
+           
+       
+   - create hard and soft links:
+     soft link:
+       ln -s <file> filename
+     hard link:
+       ln <file> <filename>    
+      
+   - List , set changes standards UGO/RWX PREMISSIONS -UNMASK:
+   - file ownership permission: these are given to u g o
+          u - user/owner
+          g - group
+          o - others 
+          chown user:group -R <directory/> # to give access to u , g for directory and sub directories
+          
+         file operations: r w x s t 
+           normal mode:
+             chmod o+rwx <filename> #to give permissions to others rwx
+             chmod o-rwx <filename> #to remove permissions to others rwx
+             chmod u+rwx <filename> #to give permissions to user rwx
+             chmod u-rwx <filename> #to remove permissions to user rwx
+             chmod ug+rwx <filename> #to give permission to user and group rwx
+             chmod u+rws <filename> #to give permissions to user rws
+             chmod a+rwx <filename> #to give permission to user and group and others rwx
+             chmod o+rwx -R <filename> #to give permissions to others rwx including sub directories
+             chmod +t <filename> #to set sticky bit to user
+           octal Mode:
+             rwx - read write execute
+             r = 4 
+             w = 2 
+             x = 1
+             no permission = 0
+          
+             chmod 777 <filename> #to give full access rwxrwxrwx to user group others
+             chmod 764 <filename> #to give full access rwxrwxrwx to user, rw to group, r to others
+             chmod 764 -R <filename> #to give full access rwx to user, rw to group, r to others
+             including all the files inside directory
+             chmod 4777 <filename> #to give full access rwsrwxrwx to user group other and set uid to user
+             chmod 2777 <filename> #to give full access rwxrwSrwx to user group other and set gid to group
+             chmod 6777 <filename> #to give full access rwsrwSrwx to user group other and set uid and gid to user and group
+             chmod 1777 <filename> #to give full access rwxrwxrwT to user group other and sticky bit only to user
+             chmod 7777 <filename> #to give full access rwx to user group other and set and sticky bit to user,owner,group
+         
+         t - sticky bit:
+             it is used to prevent premissions for other users. other than owner no one can modify it
+         s - set uid/ gid:     
+           user/owner permission bit means it runs with that set id
+   - ACCESS CONTROL LIST:
+       # This is used to set the special permissions to the users. This is done using
+       # facl command - facl -"file access control list"
+       #NOTE: if we try to find the list of files using ls -l  with any user other than permitted user
+          #nothing will be displayed.
+         setfacl -m  u:<username>:rwx <dir> #to set special permissions to user on a dir
+         setfacl -m  g:<groupname>:rwx <dir> #to set special permissions to group on a dir
+         setfacl -x  g:<groupname>:rwx <dir> #to remove special permissions to group on a dir
+        
+         getfacl <dir>  #to see the special permission set on particular directory
+
+   - locate Read and use System documentation with man, info and  usr/share/doc:
+       mandb:
+       apropos:
+       info:
+       usr/share/doc:
+       usr/share/info:
+       updatedb: and then use locate to find the file
+       locate: this will work if we use updatedb command before it
+       which:
+       whereis:
+       rpm -qd <packagename> #q query and d doc
+       find:   
+   - finding files with locate and find:
+        find /home/ec2-user  -max-depth 3 -name "*.sh" -type f -mtime +50  # find file upto 3 sub directores +50 more than 50 days ago, -50 leass than 50 days
+         
+        find /home/ec2-user  -max-depth 3 -name "*.sh" -type f -mtime 50
+
+        #to find the file 
+        find /etc/ -name "*.txt" #to find all the text files
+        find /Documents -type f -empty # to find the empty files
+        find /Documents -type f -empty -exec rm -rf {} + # to find the empty files and delete them.
+        find /Documents -type f -iname file1.txt -exec cat {} + # to find the file and read the content in it.
+        find /Documents -type f  -mmin -10 #to find files created 10 min ago.
+        find /home/ -user <username> #To see the files owned by user
+        find /home/ -type d #to find only directories
+
+
+        find <filepath>  -name file1.txt # -name is used to give the filename 
+        find <filepath>  -iname file1.txt # -iname is used to give the filename without case-sensitive
+        #ex: find /etc/ -name abcd.txt  
+  Running-System-Operations:
+   - boot/reboot/shutdown systems:
+     runlevel
+      0 – Halt
+      1 – Single-user text mode
+      2 – Not used (user-definable)
+      3 – Full multi-user text mode
+      4 – Not used (user-definable)
+      5 – Full multi-user graphical mode (with an X-based login screen)
+      6 – Reboot
+      
+      
+       init 0 shutdown
+       init 6 reboot
+       #To shutdown now
+       shutdown -h now
+       
+       #To poweroff after shutdown
+       shutdown -p now
+       
+       #To cancel pending shutdown
+       shutdown -c 
+       
+       #To send messages during shutdown
+       shutdown -k "your message"
+       
+       #To restart after shutdown 
+       shutdown -r now
+       
+       #To shutdown at  particular time
+       shutdown -h 08:30 " your message" 
+       
+       #To shutdown in 5 min..
+       shutdown -h +5 "system will be shutdown in 5min.."
+       
+       Usage: shutdown [OPTION]... TIME [MESSAGE]
+       Bring the system down.
+
+        Options:
+         -r                          reboot after shutdown
+         -h                          halt or power off after shutdown
+         -H                          halt after shutdown (implies -h)
+         -P                          power off after shutdown (implies -h)
+         -c                          cancel a running shutdown
+         -k                          only send warnings, don't shutdown
+         -q, --quiet                 reduce output to errors only
+          -v, --verbose               increase output to include informational messages
+           --help                  display this help and exit
+          --version               output version information and exit
+
+       
+   - boot system into differetn targets:
+       #to check the current target 
+        systemctl get-default
+      #to see list of targets 
+        systemctl list-units --type=target
+        
+        
+   - interrupt the boot process and gain access to system:
+   - adjust process priority and kill process:
+   - locate and interpret system log files:
+   - start/stop/check the status of system network services:
+   - securely transfer files between systems:
+  Configure-local-storage:
+   - list create/delete partitions on MBR/GPT disks:
+   - using LVM:
+   - Configure systems to mount FILE SYSTEMS at boot by using UUID or label:
+   - Add new partition and logical volumes and swap to a system NON destructively:
+   - increase security for disks and drives:
+      LUKS - Linux Unified Key Setup on disk format:
+        - This  is used to encrypt the data and provides passphrase stregthening against disk attacks        
+
+  Create and configure FILE SYSTEMS:
+   - Create/mount/unmount  and use VFAT/EXT4/XFS File Systems:
+   - Mount/Unmount CIFS/NFS network file systems:
+   - Extend existing logical volumes:
+   - create and confgure set -GID directories and colloborations:
+   - Create and manage ACL:
+   - Diagonise and correct File permission problems:
+  Deploy Configure and Maintain System:
+   - Configure networking and host name resolutions statically/dynamically:
+        troubles
+   - networking and host name resolutions statically/dynamically : 
+      - Network Manager
+   - networking and host name resolutions statically/dynamically : 
+      - Host Name configuration
+   - Schedule task using at and cron jobs:
+      touch file1.txt
+      echo "HELLO! JOB DONE" >> file1.txt | at now +1min #to run the job in next 1 min.
+      at -l # To list jobs
+      atq # To list jobs
+      atrm <jobNo> #to remove the job
+
+      - #TO CREATE A JOB at teatime tommorow i.e default teatime is 16:00hrs tomorrow
+        at -q g teatime tomorrow #this will open a command line below as shown. write the task in it 
+        at> touch /home/ec2-user/myjob.txt
+        at><EOT> #press CTRL+d TO fiinish writing
+
+      - #TO CREATE A JOB at specific time (say 16:05 tomorow)
+        at -q b 16:05 tomorrow #this will open a command line below as shown. write the task in it 
+        at> touch /home/ec2-user/myjob.txt
+        at><EOT> #press CTRL+d TO fiinish writing
+     
+      CRON:
+        - #TO see the format of CRONTAB
+           cat /etc/crontab
+          #format of CRONETAB:
+           <min> <hour> <date of month> <month> <day of week> <username> <write command here>
+        - #TO see list of cron jobs:
+          crontab -l
+        - #TO remove a cron job:
+          crontab -e # then delete that job in that file.
+        - #TO remove all cron jobs:
+          crontab -r
+      
+        - #To write a cron job:
+          crontab -e #This will open up a vi editor write ur commands  here 
+                     # to see the format -->  cat /etc/crontab
+
+        -  #To run a job to store the details of memory at 12:14 hrs today 
+          13 12 * * * touch /tmp/meminfo.log #to create file at 12:13 hrs  #here * means current date/time/month/week
+          14 12 * * * cat /proc/meminfo >> /tmp/meminfo.log #to write the meminfo details at 12:14 hrs
+        
+        -  #To run a job to store the details of memory at 'dec 15 sat 12:14 hrs'
+           13 12 15 12 6 touch /tmp/meminfo.log #to create file at dec 15 sat 12:13 hrs
+           13 12 15 12 6  cat /proc/meminfo >> /tmp/meminfo.log #to write the meminfo details dec 15 sat 12:14 hrs
+           #NOTE: in the above mentioned command
+           #13th min
+           #12th hrs
+           #15th date
+           #12th month (0-12) jan-dec
+           #6 - sat  #(0-6) sun-sat
+   - Start/stop/configure services automatically at boot
+   - Configre systems to boot into specific target automatically
+   - install RHEL automatically using quick start
+   - Configure a physical machine to host virtual guests
+   - configure a sytem to use Time Services
+   - Install and update packages from redhat n/w YUM/RPM REPO :
+      yum upgrade
+      yum update 
+   - Managing repositories:
+      yum info <packagename>
+      yum list installed
+      yum list available
+      yum remove <packagename>
+      yum deplist <packagename> #To see the list of dependencies
+
+   - Configuring local repositories
+   - Configuring local repositories using GPG keys
+   - Update kernel package appropriately to ensure bootable system
+   - modify system boot loader
+  Manage Users and Groups:
+   - Create/delete/modify Local user Accounts:
+       useradd <username>  #To add an user
+       passwd <username> #to set password to username
+
+       userdel --remove <username> #to delete the username and useraccount fully
+       #NOTE:  before deleting user check the runnning process in that username
+       #to kill the running process 
+       ps -ef --pid $(pgrep -u <username>)  #To list all running process in that username
+       killall -9 -u <username> #to kill all the process for that user  -9 signal value -u for username
+
+       usermod -a <username> -G <groupname> #to add user to the group
+       id <username> #to see the user id and group name of username
+       cat /etc/passwd #this is the file where all usernames are stored
+       cat /etc/shadow # this is file where all the user passwords are stored in encrypted format.
+       #The above command is used to check whether user has any pasword
+
+       tar -cvzf user-backup/user1-home-dir-bak.tar.gz  /home/user1/ #to take the useracount data backup
+       #in the above command tar -cvzf <dest> <src>
+
+   - Change passwords and adjust passwords aging for specific users:
+       chage -l <username> # to see the user account details or set password exp date etc..
+       usermod -e YYYY-MM-DD <username> #TO set the password exp date for user
+       usermod -m 7 <username> #to set the min. no. of days req. b/w the password change
+       usermod -M 7 <username> #to set the max. no. of days req. b/w the password change
+       usermod -I 10 <username> #to set no. of days required for an account to expire.
+       usermod -w 5 <username> #min. no. of daysrequired to warn before password exp.
+       usermod -L <username> #To lock the useraccount
+       usermod -U <username> #To unlock the useraccount
+   - Create/delete/modify Local groups and memberships:
+       groupadd developers #To create developers group
+       cat /etc/group | grep developers #to see the added group       
+       usermod -G <group-name> <username> #To add an exisiting user to the group
+       groupdel developers #TO delete the developers group
+   - Using set GID on directories:
+
+  Manage Securities:
+   - Configure firewall settings using available firewall utilities:
+      - firewall is n/w security device that monitors incoming and outgoing traffic
+        firewalld is firewall daemon, is a complete firewall solution avilable by default
+        firewall zones:
+          drop:
+            - The lowest level of trust. All incoming connections are dropped by default and 
+              only outgoing connections are allowed.
+      
+          Block:
+            - similar to drop , but rejected with icmp-host-prohibited or icmp6-adm-prohibited 
+              message .
+          Public: 
+            - untrusted networks, You dont trust other computers but allow selected incoming connections
+              case-by-case
+          External:
+            - Using firewall as a gateway. It is configured using NAT masquerading so that internal n/w
+              remains private but reachable.
+          Internal:
+            - The other side of  external zone, used for internal portion of the gateway. The computers 
+               are fairly trustworth and some additional services are available.
+          home:
+            - default internal private network zone. Doesn't allow incoming from outside network.
+          dmz:
+            - Used for computer lcated in DMZ (isolated computer that will not have access to the 
+              rest of the network). A few more services might be allowed.
+          Work:
+            - used for work machines. trust most of the computers in the network. 
+              A few more service might be allowed
+          Trusted:
+            - Trust all of the machines in the network. The most open of the available options 
+              and should be  used sparingly.
+
+
+      #To check the status of firewall
+        systemctl status firewalld
+        #or 
+        firewall-cmd --state
+      #To stop the firewall 
+        systemctl stop firewalld
+      #To start the firewall
+        systemctl start firewalld.service
+      #To restart the firewall service
+         systemctl restart firewalld.service
+      #To start GUI of firewall
+        firewall-config
+      #To see the list of firewall zones
+        firewall-cmd --get-zones
+      #To see the  configuraion of specific firewall zone (say block)
+        firewall-cmd --zone=block --list-all
+
+      #To make temporary change the firewall configuration.
+      #If the firewall service are restarted these changes will not last.
+        firewall-cmd --zone=home --change-interface=eth0
+      #To make the changes permanent
+        vim /etc/sysconfig/network-scripts/ifcfg-<interfaceName>
+        #add the below text in it
+        ZONE=home
+        #and then restart the network and firewall  service
+        systemctl restart network.service #To restart network service
+        systemctl restart firewalld.service #To restart firewall service
+
+      #To set the default firewall zone
+       firewall-cmd --get-default-zone #to see the default firewall zone
+       firewall-cmd --set-default-zone=home
+
+      #To create custom firewall zone
+       firewall-cmd --permanent --new-zone=myPublicZone
+       firewall-cmd --permanent --new-zone=myPrivateDNS
+       firewall-cmd --reload #if not reload it won't show newly created zones in the list.
+
+      PORT FORWARDING:
+        - port forwarding or port mapping used to send the comm. req to computers that
+          are traversing the gateway network
+        - #To do the port forwaring using firwall from 80 to 5555
+           firewall-cmd --permanent --add-masquerade
+           firewall-cmd --permanent --add-forward-port=port=5555:proto=tcp:toport:80
+           firewall-cmd --reload
+      nmap:
+        - it is used as a network monitoring tool
+        - #To see the open ports
+          nmap <ip-address>
+      httpd:
+        - To setup webserver
+      vsftpd:
+        - To setup file server
+        - very secure file tranfer protocol daemon. it support ipv6 and ssl
+          yum install -y vsftpd #TO install it
+
+          vim /etc/selinux/config #To disable selinux
+          #check the SELINUX=disabled 
+          
+          #to make the files available for download in the network through ftp
+          #put the files in this below location 
+           cd /var/ftp/pub/text123.txt
+          #To start the ftp service 
+           systemctl status vsftpd  #To check the status of the ftp server
+           systemctl start vsftpd #TO start the service
+
+          #To download the files from FTP server to client
+          #then goto client machine use below command
+            wget ftp://<ipaddess of server>/pub/filename
+          Troubleshooting vsftpd:
+             vim /etc/vsftpd/vsftpd.conf #default location of config file.
+      
+      ldap:
+        - light weight directory access protocol
+          #to install LDAP SERVER
+           yum install -y *openldap* migrationtools
+          #to setup ldap admin/root password
+           slappasswd #enter the password
+          #then password is printed in the console. copy it and save it in a file.
+
+          #to setup LDAP server config
+           cd /etc/openldap/slapd.d/cn\=config
+          #open the database file 
+             vim olcDatabase\=\{2\}hdb.ldif
+             #then add below line at bottom
+             olcRootPW: <password #add the password heres
+             olcTLSCertificateFile: /etc/pki/certs/example.pem
+             olcTLSCertificateKeyFile: /etc/pki/certs/examplekey.pem
+             #then change the following
+             olcSuffix: dc=example,dc=com
+             olcRootDN: cn=Manager, dc=example, dc=com
+             #then save the file
+          #to test whether file is ok
+            slaptest -u
+          #then change the monitor file in the same loc. and change the domain name
+            slaptest -u
+          #then restart and enable the slapd
+            systemctl restart slapd
+            systemctl enable slapd
+          #to check the runnning status
+            systemctl status slapd
+
+
+
+   - Configure key based authentication for SSH:
+   - Intro to SE Linux:
+   - Set Enforcing and permissive modes for SE Linux:
+   - List and identify SELinux Files and Process Contexts:
+   - Restore default file Contexts:
+   - Use boolean Setting to modify Systems SELinux Settings:
+   - Diagnose and address Routine SELinux Policy Violations:
+---
+ LFCS: 3 years
+  Essential Commands – 25%:
+   - Log into local & remote graphical and text mode consoles
+   - Search for files
+   - Evaluate and compare the basic file system features and options
+   - Compare and manipulate file content
+   - Use input-output redirection (e.g. >, >>, |, 2>)
+   - Analyze text using basic regular expressions
+   - Archive, backup, compress, unpack, and uncompress files
+   - Create, delete, copy, and move files and directories
+   - Create and manage hard and soft links
+   - List, set, and change standard file permissions
+   - Read, and use system documentation
+   - Manage access to the root account
+  Operation of Running Systems – 20%:
+   - Boot, reboot, and shut down a system safely
+   - Boot or change system into different operating modes
+   - Install, configure and troubleshoot bootloaders
+   - Diagnose and manage processes
+   - Locate and analyze system log files
+   - Schedule tasks to run at a set date and time
+   - Verify completion of scheduled jobs
+   - Update software to provide required functionality and security
+   - Verify the integrity and availability of resources
+   - Verify the integrity and availability of key processes
+   - Change kernel runtime parameters, persistent and non-persistent
+   - Use scripting to automate system maintenance tasks
+   - Manage the startup process and services (In Services Configuration)
+   - List and identify SELinux/AppArmor file and process contexts 
+   - Manage Software 
+   - Identify the component of a Linux distribution that a file belongs to
+  User and Group Management – 10%:
+   - Create, delete, and modify local user accounts
+   - Create, delete, and modify local groups and group memberships
+   - Manage system-wide environment profiles
+   - Manage template user environment
+   - Configure user resource limits
+   - Manage user privileges
+   - Configure PAM
+  Networking – 12%:
+   - Configure networking and hostname resolution statically or dynamically
+   - Configure network services to start automatically at boot
+   - Implement packet filtering
+   - Start, stop, and check the status of network services
+   - Statically route IP traffic
+   - Synchronize time using other network peers
+  Service Configuration – 20%:
+   - Configure a caching DNS server
+   - Maintain a DNS zone
+   - Configure email aliases
+   - Configure SSH servers and clients
+   - Restrict access to the HTTP proxy server
+   - Configure an IMAP and IMAPS service
+   - Query and modify the behavior of system services at various operating modes
+   - Configure an HTTP server
+   - Configure HTTP server log files
+   - Configure a database server
+   - Restrict access to a web page
+   - Manage and configure containers
+   - Manage and configure Virtual Machines
+  Storage Management – 13%:
+   - List, create, delete, and modify physical storage partitions
+   - Manage and configure LVM storage
+   - Create and configure encrypted storage
+   - Configure systems to mount file systems at or during boot
+   - Configure and manage swap space
+   - Create and manage RAID devices
+   - Configure systems to mount file systems on demand
+   - Create, manage and diagnose advanced file system permissions
+   - Setup user and group disk quotas for filesystems
+   - Create and configure file systems
+
+
+Others-MISC:
+  - RESET ROOT PASSWORD:
+     - On the boot menu - press e to interrupt the process.
+     - Press down arrow and search for linux 16
+     - Then press the END key on keyboard to go to the end of the line.
+     - Then type 'rd.break' at the end of line without quotes. 
+     - and then press CTRL+X
+     - Then type -> mount -o remount, rw /sysroot
+     - Then type -> chroot /sysroot
+     - psswd root #to set the root password. then set the password
+     - touch /.autorelabel 
+     - exit 
+     - exit
+
+  - Configure IP Address, Gateway and hostname of your Virtual Machine:
+     - set ip address 192.168.0.3
+     - set hostname web.example.com
+     - set gateway 192.168.0.2
+     NOTE: these changes can be done using single command nmtui
+       - in the console type -> nmtui
+       - it will open a graphical UI and enter the details there
+       - and then activate them 
+       - and then reboot the system to make the changes permanent
+
+
+ 
+
+
+
+

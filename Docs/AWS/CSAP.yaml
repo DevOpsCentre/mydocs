@@ -1,0 +1,1533 @@
+CSAP - Certified Solution Architect - Professional
+
+  - ABILITY TO DESIGN and Deploy 
+     - Dynamically scalable
+     - Highly Available
+     - Highly Reliable
+     - Fault tolerant  and reliable applications on AWS.
+  - Migrate Complex and Multi tier Applications on AWS.
+  - Design and Deploy Enterprise wide scalable operations on AWS
+  - Implement cost control Strategies.
+
+  
+AWS SolArchProfessional:
+
+1.0 Design for Organization Complexity:
+  - AWS Organization
+  - Cross Account Access
+  - Tagging
+  - Security across Accounts
+
+2.0 Design Networks for Complex Organizations:
+  - VPN
+  - AWS DIRECT CONNECT
+  - VPC PEERING
+  - NETWORK SECURITY (EP, NACL,SG )
+  - VPC Endpoints
+  - AWS TRANSIT GATEWAY
+  - NTWRK LB
+  - PRVT HOSTED ZONE 
+  - OTHER ROUTING POLICIES
+  - GEOPROXIMITY ROUTING POLICY
+  - Complex networking Configuration
+  - SAML federation
+
+2.1 Design for new solutions:
+ - AWS directory Service
+ - AWS cognito
+ - IAM credentials and Access mgmt roles
+ - encryption in S3,KMS,EBS
+ - AWS certificate mgr
+ - AWS inspector
+ - AWS Guard Duty
+ - AWS Sheild
+ - Security against Man-in-middle attacks
+ - Securing against DDOS attacks
+ - EC2 intrusion Detection and Prevention
+ - The Key mgmt service
+
+2.2 Solution Strategy to meet reliability requirements:
+ - Disaster recovery Platforms
+ - EC2-Autoscaling
+ - Network Redundancy
+ - route 53 Health Checks
+ - AWS lambda and SQS
+ - S3- Cross region replications
+ - Dynamo DB HA
+
+2.3 Solution to meet performance Objectives:
+ - Cloud Front with S3
+ - Data Analytics
+ - Amazon Machine Learning tools
+ - Amazon Data Analytics
+ - Amazon Athena
+ - Amazon Workspaces
+ - Amazon App stream 
+ - AWS Kinesis Data Stream
+ - kinesis Data Firehouse
+ - Instance Types
+ - API gateway AWS Lambda
+ - Labs AWS Batch
+
+3.Migration Planning:
+ - Data Transfer methods
+ - Database Migration Services
+ - Migrating Workloads uses cases
+
+4. Cost Control:
+ - AWS cost Explorer
+ - Cost Consideration
+ - EC2 Cost optimization
+ - S3 Intelligent tiering/storage classes
+
+5. Continuous Improvement for Existing Solutions:
+ - Security
+ - CI and CD tools
+ - Blue Green Deployments
+ - Rolling deployments
+ - Elastic beanstalk
+ - Elastic Container Service
+ - AWS Ops Works
+ - Improving Network Performance
+ - Compute HA
+ - EBS HA
+ - AWS Storage Gateway
+ - EFS
+ - Serverless Application Model
+ - Network Devices HA
+ - AWS Tools
+ - Improving Performance of Applications
+
+=================================================================================
+               1.1 Design for Organization Complexity - AWS Organization
+=================================================================================
+
+AWS Organization:
+   - Multiple AWS master accounts can be controlled using AWS Organizations.
+   - This AWS Organization can be create from one MAster account and we can add
+     the remaining account as the members.
+   - We can group accounts into organizational units.
+   - We can have consolidated billing for all the accounts under AWS organization.
+
+   - The resources usages can be controlled through 'Service Control policies' in the
+     AWS organizations. These are applied to root level. 
+
+
+=================================================================================
+=================================================================================
+               1.2 Design for Organization Complexity -  Cross Account Access p173789 o512790
+=================================================================================
+   Let's give our S3 access to user in other AWS account:
+   from present account (say id:123456789)
+     -> Click on Create a role in IAM section.
+     -> Choose another aws account 
+     -> give other aws account-id (to which you are trying to give access. say id:123456790) 
+          NOTE: (click on the account name -> my account on top right banner in mgmt 
+                console to see the account id)
+     -> can select MFA / external id if required. while creating.
+     -> attach permission policies 
+     -> Click on create role.
+     -> Click on the newly created ROLE and Copy the Role ARN (in sumary section ).
+     -> Now goto that AWS account (say 123456790) to which you are trying to give access.
+     -> goto IAM select an user to whom we need to give access
+     -> Click on that user -> permissions -> inline policies -> Click on JSON
+     -> try to add the code in below format. and attach it to user
+     -----------------------------------------------------------------------------
+      {
+        "Version":"2020-03-27",
+        "Statement": {
+          "Effect": "Allow",
+          "Action": "sts:AssumeRole" #sts - Security Token Service -Assumed Role.
+          "Resource": "arn:aws:iam::123456789:role/externals3role" #This is the arn copied earlier.
+        }
+
+      }
+     -----------------------------------------------------------------------------
+     -> Now login with that user.
+     -> by default he can't see anything.
+     -> Now click on the Switch role.
+         NOTE: (click on the account name -> switch role on top right banner of the mgmt console)
+     -> Give the account ID 123456789 and role name created in that account.
+     -> Now click on switch role that's it.
+                
+=================================================================================
+=================================================================================
+               1.3 Design for Organization Complexity -  Tagging
+=================================================================================
+ Tags:
+   - Metadata in the form of key value pair.
+   - easy to search and filter.
+
+ Tags Types:
+   - Technical Tags:
+       Name,AppID,AppRole,Cluster,Env,Version
+   - Tags for Automation:
+       DateandTime, Opt-in/Opt-out, Security
+   - Business tags:
+       Owner, Business Unit, Customer, Project Name
+   - Security Tags:
+       Confidentiality, and Compliance.
+  Strategies:
+    - Tags for AWS console Organization: easy to search and filter resources
+    - Tags for Cost Allocation: 
+        - This eables detailed Billng report
+        - Customer can activate an AWS generated createdBy tag to Avoid uncategorized resources.
+    - Tags for Automation:
+        Automation tags are used for opt-in and Opt-out of automated tasks to identify  
+        specific version of resources to achive update or delete.
+    - Tags for Access Control:
+        - IAM support tag based conditions 
+        - Enable constraints based on the tags
+
+  Best Practises:
+      - Create stadardised tags in case sensitive format.
+      - Too many tags are better than few tags.
+      - Leverage automated tools such as Resource Groups
+      - Be watchful while editing tags.
+
+=================================================================================
+               1.4 Design for Organization Complexity -  Security across Accounts
+=================================================================================
+
+ Security in Single Account:
+   - IAM 
+ Mgmt and governanace:
+   - Amazon Cloud Watch: Manage Metrics, Trace logs
+   - AWS Cloud Trail: Monitor allAPI activity
+   - AWS Config: Manage All Confguration of resources 
+   - AWS Organizations: Centralized control of Multiple AWS Accounts
+
+ Strategy:
+   Master account ---> security account --> Developer Accont
+                                        --> Production Account
+
+   - In the above schema centralized security account:
+            - should only be used to store logs.
+            - should have limited user access.
+            - should not have ability to delete LOGS.
+
+
+=================================================================================
+=================================================================================
+               2.0 Design for Organization Complexity -  VPN
+=================================================================================
+ 
+  -  If the organization of mid size workloads:
+         - 10-100Mi or  1Gi of workload , then go for VPN
+         - if 100s of TB's of workload ,then  go for Direct Connect.
+
+      AWS Site-to-Site VPN :
+       An IPSec VPN connection b/w your VPC and your remote Network.
+       - Virtual Private Gateway -  On the AWS side of site-to-site VPN Connection.
+       - Customer Gateway - On the remote side of Site-to-Site VPN Connection. (customer connecting from outside)
+       
+      AWS Client VPN: 
+        - A managed client based VPN service that enables you to securely access your AWS resources
+        in your on premise network.
+        - With AWS  Client VPN, you configure an endpoint to which your users can connect to establish 
+        a secure TLS VPN Session. You can access resources in AWS or an on-premises from any location
+        using an openVPN-based VPN Client.
+    
+      AWS Cloud VPN:
+         - If you have more than one remote n/w, you can create multiple AWS Site-to-Site VPN connections
+           via your virtual private gateway to enable communication between these networks.
+         
+         - we can use these if we have multiple branches.
+
+
+      AWS Site-to-Site VPN:
+         - Lets say we want to connect to VPC which is having Private subnet
+           (It would not have public IP) that from the data centre.
+         - Then we need to create a Virtual Private Gateway and attach it to the VPC:
+              - It will have ASN (Autonomous System Number). It's unique number to identify autonoumous 
+                  system/globally. Once it is associated with VPG  we can't change the ASN once created.
+              - if we dont specify the ASN number , then it create a default Number 64512.               
+              - after that we have to mention the private subnets in route tables.
+         - On the remote side, we have to configure Customer Gateway (Hardware device or software application):
+                 - Examples of AWS customer gateway devices:
+                     - Cisco ASA running Cisco ASA 8.2 or later.
+                     - Cisco IOS running Cisco IOS 12.4 or later.
+                     - juniper J-series running JunOS 9.5 (or later)  software.
+                     - Microsoft Windows Server 2012 R2 (or later) Software.
+              - On the customer gateway side We have to give internet routable IP Address Static.
+              - and the other one is routable table:
+                    - static/dynamic type it depens on make and build of device.
+
+         - When both the VPG and Customer gateway is established then IPsec VPN Tunnel is established.
+         - Customer gateway is responsible for the IPSec Tunnelling and it is tuned on when traffic is 
+           generated from the  Customer Gateway.
+         - NOTE: If we need to transfer 100's of TB's of PetaBytes like Data Migration. Choose AWS Direct 
+           Connect. 
+
+============================================================================
+     2.0 Design Networks for Complex Organizations: - AWS DIRECT CONNECT
+============================================================================
+ 
+  - This is used to link an internal network to an AWS Direct Connect location.
+    The Connection is established over a standard ethernet fiber-optic cable.
+  - Once you have a Direct Connect link, you can then create virtual interfaces to access the AWS Services.
+  - Using this interfaces you can access the public services such as Amazon s3. This access is 
+    established via the AWS Backbone network and bypass the network.
+  - NOTE: this AWS DIrect connect is used  if we need Higher bandwith and consistent connections.
+
+
+  - Virtual Interfaces:
+     - Private/Public Interfaces - This can be used to access the Amazon VPC using
+       the private IP address and AWS Public services using the public IP addresses.
+     - Transit virtual Interfaces - This can be used to access one or more Amazon VPC Transit Gateways
+       that are associated with Direct Connect gateways.
+
+===============================================================================
+     NOTE: for windows IIS Server - default location for deployment -
+           C:\inetpub\wwwroot\
+===============================================================================
+
+============================================================================
+     2.0 Design Networks for Complex Organizations: - VPC Peering
+============================================================================
+
+ - This is a network connection beween the two VPC's 
+ - Traffic  can be routed across the VPC Peering Connection.
+ - The two VPC's can be in different AWS accounts.
+ - They can also be in different regions.
+
+ Implentation of vpc peering:
+    - One VPC must send req to another vpc for VPC Peering connection.
+    - The destination VPC must accept the VPC peering connection request.
+    - Routes must be added to both the route tables on both vpc's
+    - Also ensure security groups allow Inbound Traffic.
+     connections:
+       - GO to VPC dashborad and create vpc's:
+         vpcA (20.0.0.0/16) 
+         vpcB (10.0.0.0/16)   
+         vpcC (10.0.0.0/16)          
+
+       - GO to VPC dashborad after creating vpc's. :
+          - Then go to peering connections on the left
+          - Create vpc peering connection as below and add the cidr entry in the route tables 
+          of both vpc's:
+
+         vpcA (20.0.0.0/16) <--> vpcB (10.0.0.0/16)   
+         vpcA (20.0.0.0/16) <--> vpcC (10.0.0.0/16)
+
+         vpcA to vpcB works and vpcA to vpcC works.But vpcB to vpcC dosn't work automatically         
+         also can't establish peering connection since both B and C CIDR looks same.
+
+         if we want to establish connection , better to mention the subnet range. (10.0.0.0/24).
+         THen B (10.0.0.0/16) <--> c (10.0.0.0/24) will work.
+
+ Charesterstics of VPC Connection:
+    - The VPC's for whichyou want to implement VPC Peering can't have overalapping CIDR blocks.
+    - you can't extend the peering relationship to that connection if :
+      - A VPN Connection or an AWS Direct connect connection.
+      - An internet connection via internet gateway.
+      - An internet connection in the private subnet via a NAT Device.
+      - A Gateway VPC Endpoint.
+
+      
+==============================================================================================
+     2.0 Design Networks for Complex Organizations: - NETWORK SECURITY (EP, NACL,SG )
+==============================================================================================
+     When we create vpc with CIDR AWS uses 1st 5 ip addresses. ex: 10.0.0.0/24
+       - 10.0.0.0  Network Address
+       - 10.0.0.1  Reserved for AWS VPC Router
+       - 10.0.0.2 Reserved by AWS. The IP address of the DNS server is always n/w base address +2.
+          NOTE: if we have multiple CIDR blocks, then DNS server located on primary CIDR.
+       - 10.0.0.3 Reserved by AWS future use.
+       - 10.0.0.255 Network Broadcast Address. However AWS desnot support n/w broadcast. So it is reserved.
+
+
+     SECURITY GROUPS: STATEFUL:works at Instance level:
+      - can be applied to ELB, EC2, EMR, LAMBDA 
+      - proctects Instances by applying security rules like firewall.
+      - we can configur re rules on security groups for different type of requests like
+        HTTP,HTTPS,UDP,ICMP and port numbers.
+
+      - By default when a new security group is created. It 'denies' all Incoming/Inbound traffic.
+      - By default Outgoing/outbound traffic is allowed.
+      - These are called 'stateful' because if inbound traffic is  allowed outgoing is 
+        automatically alowed.
+
+     NACL: Network Access Control Lists: works at Subnet Level: STATELESS
+       - These works at subnet level.
+       - Manually enable both inbound/outbound traffic IP and ports.
+       - It consists of ordered rules:
+           - Rule number
+           - Protocols
+           - The source of the traffic (CIDR range) and destination (listening port or port range (Inbound Only)
+           - The destination of the traffic (CIDR range) and destination (listening port or port range (Outbound Only)
+       - CHOICE to ALLOW/DENY specific traffic. 
+
+      - default NACL allows all the traffic by default,
+      - Custom NACL denies all the traffic by default.
+
+         - It has rule numbers, and the rule numbers are applicable in the order of
+           100 ,200,300  (ascending order of rule number ) 
+           ex:
+           100  ssh(22) protocol (tcp)  portrange(22)  cidr(22.65.32.1/32)  ALLOW
+           200  HTTP(80) protocol (tcp)  portrange(80)  cidr(22.65.32.1/32)  ALLOW
+           300  ssh(22) protocol (tcp)  portrange(22)  cidr(22.65.32.2/32)  ALLOW           
+           *  All traffic  ALL             ALL           0.0.0.0/0           DENY
+
+         - Each rule number has port number port type and protocol number.
+
+    NOTE: Opening same ports in NACL Inbound and Outbound does not work. We need to use 
+    ephermal port range in the Outbound.
+
+    Outbound NACL should use epehermal Ports range as mentioned below.
+
+    NACL Ephermal Ports: (clients network generates requests with any port no. mentioned in the range )
+      - Many Linux Kernels (Including the Amazon linux Kernel ) use ports (32768-61000)
+      - Requests Originating from Elastic Load balancing use ports (1024-65536)
+      - Windows OS thriugh Windows Server 2003 use ports 1025-5000  
+      - Windows Server 2008 and later versions use ports 49125-65535
+      - A NAT Gateway uses ports 1024-65535.
+   
+==============================================================================================   
+   2.0 Design Networks for Complex Organizations:   - VPC Endpoints
+==============================================================================================
+
+   -  VPC Endpoints 
+        - These endpoints are virtual devices.
+        - These devices are horizontally scaled, redundant and highly available.
+        - There are two types of endpoints:
+              - Interface:
+                  - The interface endpoint is used to connect to other AWS Devices.
+              - Gateway:
+                  - The Gateway endpoint is used to connect to S3 and DynamoDB.
+   Implementation:
+     - Goto VPC dashboard, create VPC with public and private subnet vpc using vpc wizard.
+     - You need to use a NAT Gateway/NAT Instance while creating a VPC
+         - NAT Gateway is managed by AWS and it needs EIP (Elastic IP)
+         - NAT instance is not robust and it can be single point of failure. But charges are less.
+     - If we dont want to use either of the above, then  use them while creating and later we can 
+        remove it in the 'Routes Tables' and NAT Gateway section of VPC.
+
+     - To attach an Endpoint to VPC:
+          - Goto VPC Dashboard ,Click on Endpoint
+          - Click create an endpoint 
+          - Choose the AWS service (for example S3 if we want to)
+          - Select VPC to which we need to attach the endpoint.
+          - Select the subnet (public / private  to which you want to attach endpoint)
+          - Select the access Policy.
+          - Create the endpoint.
+   
+
+==============================================================================================   
+   2.0 Design Networks for Complex Organizations:  - Transit Gateways
+==============================================================================================
+    
+      - We can use Transit gateways instead ,if we have more vpc and VPC Peering connections.
+      - This Trasit Gateway is like a Hub that can be used to connect the VPC n/w together.
+      - We can also have a connection to you on permise network.
+      - There is also a route table defined withing the Transit Gateway.
+      - This route table allows both IPV4 and IPV6 CIDR and targets 
+      - Transit gateways support static and dynamic routing b/w the VPCs and VPN Connection.
+
+      Implementation:
+        -  Goto VPC DashBoard
+        -  Scroll down on left side and look for Transit gateway
+        -  Click on Transit gateway and create Transit gateway.
+        -  Now  Find the Transit gateway attachment below the transit gateway and click on it.
+        -  Select the transit gateway 
+        -  Select the VPC to attach and subnet to attach and click on create ransit gateway attachement
+        -  Repeat above 3 steps  for attaching the another VPC.
+
+        - Select the Server and its Subnet from which you want to connect to other vpc.
+        - Now go to the subnet and select the subnet and select the route table 
+        - Now click on the Routes and edit the routes (add the CIDR of VPC which we want to connect to)
+          and attach the transit gateway attachment.
+        - Repeat the above 3 steps for on the other Server to complete the connectivity setup.
+
+==============================================================================================   
+    2.0 Design Networks for Complex Organizations:  - NETWORK LOAD BALANCER
+==============================================================================================
+
+     - Create the target group with protocol 'TCP' and select the VPC in which you have the instances.
+     - This is a Load balancer that works for layer 4 of the OSI Model.
+     - It has capacity to handle millions of requests for second.
+     - You can enable the load balancer to work from different Availability Zones 
+       for added high availability.
+     - You can also assign static address for the Load balancer.
+     - Each instance on the target group can listen on a different port number.
+
+
+
+==============================================================================================
+     2.0 Design Networks for Complex Organizations: - SAML federation
+==============================================================================================
+        
+==============================================================================================
+     2.1 Design for new solutions: - AWS directory Service
+==============================================================================================
+    AWS Directory Services Types:     
+     
+        - AWS Managed Microsoft AD
+        - Simple AD
+        - AD Connector
+        - Amazon incognito User Pools.
+
+    - AWS Managed Microsoft AD:
+
+        - This is Microsoft Managed Active directory as a managed service .
+        - This is powered by Microsoft Windows Server 2012 R2 and is highly available.
+        - With AWS Managed Microsoft AD, you can run directory aware workloads in AWS Cloud.
+
+    - Simple AD:
+
+       - This is a standard managed directory that uses Samba 4 Active Directory Compatible 
+         server.
+          - THere are two sizes available, -small for support of 500 Users.
+          - Large which supports upto 5000 Users.
+          - Simple AD provides subset of features that are offered by AWS managed Services. 
+
+    - Active Directory Connector: 
+
+          - This can be used to redirect directory requests to on-premise defined Microsoft 
+             Active Directory.
+
+          - This is useful when companies already have a large deployment of Active Directory 
+             in thier on-premise environment.
+
+          - Here they can use thier existing applications to log onto AWS applications such as
+            Amazon Workspaces, Amazon WorkDocs and Amazon WorkMail.
+
+==============================================================================================
+    2.1 Design for new solutions: - Simple AD
+==============================================================================================
+      
+    GoTo Amazon Directory Service:
+      Choose the directory,
+      Give the Directory Name (DNS Name) , Admin Password. 
+      Choose the vpc and subnets and click on create Directory.
+
+      Create the Role using below policies
+    - Roles:
+        - AMAZONssmDirectoryServiceAccess
+        - AmazonSSMmanagedInstanceCore
+
+     While creating EC2, select the Domain Join Directory (select Domain VPC) and IAM
+     under the Instance configuration section.
+
+==============================================================================================
+     2.1 Design for new solutions: - IAM credentials and Access mgmt roles
+==============================================================================================
+     - This is a service that provides authentication, authorization and user management  
+       for your web.
+     - Users can sign in with username and password or via a third party application such as 
+       Facebook, Amazon or Google.
+     - You can create either userpools or identity pools.
+
+     User Management:
+
+       - Having userpools provide the following benefits
+            - Automatically provides sign up and sign in services.
+            - You can built in customizable web interface for sign-in users.
+            - You can also use other sign-in  provides such as Facebook, Google, Amazon.
+            - You can also user features such as MFA.
+
+       - To create user pool -> go to the AWS Incognito -> manage userpools
+
+===========================================================================================
+   2.1 Design for new solutions:  - AWS Encryption in S3,KMS,EBS
+===========================================================================================
+  
+   - Encryption in Transit:
+       - VPN with IPSec:
+             To connect from corporate to AWS Resources securely.
+       - using TLS for Network Layer Traffic:
+       - SSL certificates for web applications and cloudfont to encrypt/decrypt data on https protocol:
+       - HTTPS Listeners for your load balancers:
+       - Using SSL to encrypt a connection to a DB Instances:
+       - Using VPC endpoints to keep the data transit flow private to AWS Network:
+
+   - Encryption at Rest:
+       - AWS Default encryption is by default enabled for EBS, S3 and uses AES 256 Encryption.
+       - Client Side Encryptions.
+       - AWS KMS - Key mgmt services
+
+===========================================================================================
+   2.1 Design for new solutions:  - AWS Certificate Manager (ACM)
+===========================================================================================
+
+   - AWS Certificate manager used for creating TLS/SSL based certificates.
+   - These certificates can be used for AWS Based websites or applications.
+   - We can use public certtificates provided by ACM or import our own.
+   - Validy 13 months for ACM certificates.
+   - Each certificate must have one FQDN.
+
+   NOTE: We can add these certificates to Load balancer by selecting HTTPS port and select
+    the certificates gfrom the dropdown menu shown in security (if already generated for domain).
+
+
+===========================================================================================
+   2.1 Design for new solutions:  - AWS Inspector
+===========================================================================================
+
+  - This tool can be used to test the N/w accessibility  of AMAZON EC2 instance.
+  - It can also be used to check the state of the security of the underlaying applications that run on
+    those instances.
+  - This service can be used to scan  applications to check for any vulnerbility and deviations
+    from best practises.
+
+  Implementation:
+     -  select AWS Inspector and cick on get started its is chargable per 100 instances per week
+     -  Choose the assessment setup  for Network Assessment/Host Assessment
+     -  You can select Instances assessments based on region or choose them based on key values
+     -  For network assessments AGENT is optional and for HOST , the AGENT is to be installed in ec2
+     -  N/W Assessment - checks the open ports and connectvity from outside VPC.
+     -  Host Assesment - for applications vulnerebilities
+     - Runs the following packages :
+         - Common Vulnerebilites and Exposure
+         - CIS - operation system security COnfiguration Benchmarks
+         - N/W Rreliability
+         - Security Best Practises.
+     - Select the Duration and  choose recurring assesment schedule weekly.
+     - We an checck the assesment details in findings section on the left side of page and click on it.
+
+===========================================================================================
+   2.1 Design for new solutions:  - AMAZON Guard Duty
+===========================================================================================
+
+     - This is continuous Security Monitoring Services.
+
+     - This service analyses the following data sources:
+           - VPC Flow LOGS
+           - Cloud Trail events
+           - DNS Logs
+
+     - It is used to identify unexpected and potentially unauthorized and malicious
+       activity from within the AWS account.
+
+     - This is done with the help of security intelligence feeds and lists the malicious
+       IP's and domains.
+
+     - Security Monitoring Services:
+        - Ecalation of priviliges
+        - Uses of exposes credentials
+        - communication with malicious IP's and userpools
+        - Detect compromises EC2 instances having malware.
+        - Can also detect unauthorized infrastructure Deployments. 
+        - It is region specific.
+        - you can also invite other aws accounts to use AMAZON Guard Duty.
+        - you can also suspend or disable amaon gaurd duty anytime.
+
+
+===========================================================================================
+   2.1 Design for new solutions:  - AMAZON SHEILD
+===========================================================================================
+
+    -  AWS SHEILD protects againts the DDos(Distributed denial of services) attacks
+    -  It has two plans standard(activate with no additional charge) and advanced (3k $ pm)
+
+===========================================================================================
+   2.1 Design for new solutions:  - Securing against Man in Middle Attacks
+===========================================================================================
+   - DNSSEC (Domain Name System Security Extensions) protocol for securing the DNS traffic.
+   - You need to configure DNSSEC for domain registration.
+   - Using ALB with SSL/TLS to prevent from Man in Middle attacks.
+      - we can use ACM to generates SSL and TLS Certificats
+
+===========================================================================================
+   2.1 Design for new solutions:  - Securing against DDos Attacks
+===========================================================================================
+
+   - Using Larger  EC2 instances - There are instances which offer 25 Gigabit N/w interfaces
+      and enhanced networking.
+   - You can use Elastic Load balancer which can automatically scale based on demand.
+
+   - With ALB you can ensure that only well formed web requests are routed to backend 
+     instances.
+
+   - You can use Amazon Cloud front to Distribute your content. It accepts only 
+    well-formed connections.
+
+   - Cloud fornt uses edge locations to deliver responses . This would reduce the load
+     on the origin system.
+
+   - We can also use WAF (Web Application Firewall) to protect against web based attacks.
+   - This WAF tools works with CloudFont and ALB
+   
+===========================================================================================
+   2.1 Design for new solutions:  - EC2 Intrusion Detection and Prevention
+===========================================================================================
+
+   - It can be done by using AntiVirus  or purchase from AWS MArketplaces.
+     Look for Intrusion Detection and Prevention systems
+
+=========================================================================================
+   2.2 Solution Strategy to meet reliability requirements: - Design for Reliability
+=========================================================================================
+
+   - Ensure Application is reliable
+   - Ensure  underlaying infrastructure hosting your application is reliable.
+   - At times you also have to account for reliability of external services that you might be
+     using from you applications.
+
+   Fault Tolerance:
+      - How tolerant is your application or system to faluts.
+      - Does it impact SLA.
+
+   High Availability:
+      - Look at ways to make your system highly available.
+      - In AWS, there are several ways to achieve this.
+      - You can use of Availability zones to spread your load.
+      - make use of Highly available service such as Simple Storage Service and DyanmoDB.
+
+   Disaster Recovery:
+      - Some companies have mission critical applications running on the AWS.
+      - Here they can't afford to have the system down, and would normally need to match the 
+        SLA of 99.99%
+      - So even if the entire region is hosting AWS Services goes down, they 
+        should be ableto recover.
+   
+   Recovery Time Objective:
+      - How long will a company wait for a system to be brought back online after the fault 
+        has occured of if the system has gone down. 
+      
+      - This is a measurement of time. Companies could define that an SLA of just a couple
+        of minutes for mission critical applications.
+
+   Recovery Point Objective:
+      - This is the amount of data loss the company can live with. We should be able to 
+        recover the data within the SLA.
+
+
+=========================================================================================
+   2.2 Solution Strategy to meet reliability requirements: Disaster recovery Platforms
+=========================================================================================
+    
+    - Backup and Restore:
+        -  It takes lot of time to restore and recovery.
+        -  If you are maintaining database on the EC2 instance, It takes even longer.
+   
+    - Pilot Light:
+       - In this strategy, services that are critical are replicated to another environment.
+       - In case of any issue, we can simply switch to another environment.
+       - It incurs aditional cost for having extra env, but, It reduces the RTO.(Recovery Time Objective)
+       - We need to ensure the strategy for data sync is properly maintained. 
+         RPO ( Recovery Point Objective ) depends on the data sync process.
+
+    - Warm Standby:
+       - In this strategy, all services are replicated to another environment.
+       - In case of any issue, we can simply switch to another environment.
+       - It incurs aditional cost for having extra env, but, It reduces the RTO.(Recovery Time Objective)
+       - We need to ensure the strategy for data sync is properly maintained. 
+         RPO ( Recovery Point Objective ) depends on the data sync process.
+
+
+=========================================================================================
+   2.2 Solution Strategy to meet reliability requirements: Autoscaling Groups
+=========================================================================================
+   Components of ASG:
+     - Launch configuration
+     - ASG: Collection of EC2 Instances.
+     - Scaling Options:
+          - minimum no. of instances
+          - desired no. of instances
+          - Max. no. of instances
+
+
+   Auto Scaling:
+    - Configuration:
+        - The launch configuration contains AMI,instance type, key pair, sg, 
+          block device mapping
+        - configuration can't be modified once created.
+        - One launch config can be used by many ASG's. But one ASG can have one configuration only.
+        - Scale the no. of instances automatically based on the criteria.
+
+        NOTE: For scaling groups
+           - you can also perform a scheduled scaling.
+           - you can also perform scaling based on metrics.          
+
+
+    - ASG: features
+       - Scaling Options:
+           - Maintain current instance level all the times.
+           - Manual Scaling.
+           - Scaling based on the schedule.
+           - Scaling based on the demand.
+    - Multiple Scaling Policies:
+         - ASG can have more than one scaling policy attached to it. Also we can 
+           combine the sacling policy
+
+    - To test the autoscaling groups: scaling based on %CPU utilization
+         - sudo apt-get install -y stress
+           stress --cpu 100
+
+
+
+=========================================================================================
+   2.2 Solution Strategy to meet reliability requirements: Network Redundancy
+=========================================================================================
+
+    - we can have one VPN gateway and multiple Customer gateways with VPN/AWS Direct Connect
+      to ensure redundancy. If one customer Gateway is down, then other one can be used.      
+
+
+=========================================================================================
+   2.2 Solution Strategy to meet reliability requirements: - AWS lambda and SQS
+=========================================================================================
+
+    - You can have SQS Trigger for Lambda function.
+    - Message sent through SQS queue can be automatically processed by LAMBDA
+    - AWS LAMBDA can connect through both standard queues and FIFO queues.
+    - AWS LAMBDA can read messages in a batch and multiple batches at a time.
+
+    benefits of using SQS qith LAMBDA:
+      - When configuring visibility timeout for the queue ensure the timeout is atleast
+        6 times the timeout configured for the function.
+
+      - If a message fails to be processed multiple times, you can make AMAZON SQS send the 
+        messages to the dead-letter queue.
+
+      - You can also configure Cloud Watch alarms to notify you when the errors occur.
+
+
+=========================================================================================
+   2.2 Solution Strategy to meet reliability requirements: - S3- Cross region replications
+=========================================================================================
+
+    - Replications allow s copying of objects across Amazon s3  Buckets.
+    - The objects can be copied across different AWS Regions or within the same region.
+
+    - Replications are required for 'Compliance' . meaning standadrds and  rules.
+      Sometime due to organization standards data might be required to be replicated 
+      across multiple locations. This could be uswed for backup purpose.
+
+    - 'Latency' if users are located in other regions, you can replicates and bring objects 
+       closer to the users of that region.
+
+=========================================================================================
+   2.2 Solution Strategy to meet reliability requirements: - Dynamo DB
+=========================================================================================
+
+=========================================================================================
+   2.3 Solution to meet performance Objectives: - Cloud Front with S3
+=========================================================================================
+
+   - Cloud front decreases the Latency by transfering the static content of the webserver
+     or s3 bucket to nearest edge locations
+   -  
+
+=========================================================================================
+   2.3 Solution to meet performance Objectives: - ElastiCache
+=========================================================================================
+  
+  - This is ideal for heavy read applications to improve througput.
+  - Ideal for socail n/w site, gaming, medai sharing
+  - This cache is used to store results of database queries and intensive computational 
+    calculations 
+  - This service can do all the heavy lifting in setting up the cache.
+
+  - It would provision the underlayiong infrastructure and also install all of 
+    the required software as well.
+
+    Different Cache engines:
+      - Memchached:
+          - If your are looking for simple object caching, consider using Memchached.
+          - If there is a requirement to run large cache nodes, consider using Memcached.
+
+      - Redis: used for below:
+          - for complex data types, bit arrays, hashes
+          - for implementing sorting or ranking of datasets for gaming applications
+          - for High availability of cache store with herlp of multiple zone along with 
+            failover 
+          - For compliance to standards such as PCI and also implement encryption.
+
+=========================================================================================
+   2.3 Solution to meet performance Objectives: - Amazon Data Analytics
+=========================================================================================
+  
+   AMAZON EMR: Managed Hadoop Cluster
+      - This is a managed platform that can create cluster to run the big data framework
+         such as Apache Hadoop , Apache spark.
+
+      - You can use these clusters to analyse vast amount of data 
+      - This is ideal for business intellegence workloads
+      - Data, both i/o can be stored in Amazon s3
+      - You can use Amazon cloud Watch to monitor performance of cluster.
+
+    Implementation: 
+        - EMR: 
+           - Cluster name:
+           - select software applications:
+                -  Core Hadoop, Hadoop with Ganglia Hive, Hue, Mahout, PIG and TEZ
+                -  HBase with Ganglia, Hadoop , Hive, Hue, Pheonix, and zoo keeper.
+                -  Presto with Hadoop HDFS and Hive, Metastore.
+                -  Spark on Hadoop, YARN with Ganglia and zeppelin.
+           - Hardware configuration:
+               - Instance type m5.xlarge
+               - Number of instances (min. 2  (1 master and 1 node))
+               - Security and access:
+                   - select a key pair.
+                   - permission , you can use IAM Roles:
+                        default roles are:
+                           - EMR DEFAULT Role.
+                           - EMR EC2-DEFAULT ROLE.
+               - create the cluster
+
+            -  Once the cluster is up:
+                - click on add steps and select the step type as hive from dropdown (if hive)
+                  - Give the script s3 location
+                  - file location if stored in s3 give the bukcet and file path
+                  - give the output s3 bucket location
+                  - click on add job, once the job is completed  , check the output in output
+                    bucket given above while creating
+
+
+   AMAZON CloudSearch:
+     - This is a managed service that can be used for search solution for an
+        application or website.
+
+     - Here you can search large collection of data.
+       The data can be in the form of webpages or blog pots or document files.
+
+     - Amazon Cloud search can be used to index and search both structured data and plain 
+       text.
+
+     - You can do boolean search  or range search or full text search.
+
+
+   AMAZON Glue:
+
+     - This is fully managed ETL (Extract transform and Load) service.
+     - You can use this tool to move data reliably b/w various data sources.
+     - You can also categorize data, clean it and enrich it.
+     - AWS GLue is completely serverless service.
+     - It also ha repository called as AWS Data Glue Catalog.
+     - It also consists of ETL engine that can be used to generate Python or Scala Code.
+
+
+   AMAZON QucikSight:
+
+     - This service can be used to build Visualizations and perform adhoc analysis and get
+       insights from your data.
+     - It can work with variety of data sources.
+     - You can prepare data before it is visualized.
+     - You can create different types of visualizations for data.
+
+
+
+
+=========================================================================================
+   2.3 Solution to meet performance Objectives: - Amazon Machine Learning tools
+=========================================================================================
+   AMAZON SageMaker:
+      - This is fully managed machine learning service
+      - can be used by dta scietits and developers
+      - This service can be used to build and train machine learning models and can be 
+        deployed to production based env.
+      - Here you also have access to jupyter notebooks taht can be used to explore data 
+        sources
+      - This service also has common machine learning algorithms that can be used 
+        against large data sets.
+
+   AMAZON Rekognition:
+     - This is a image recognistion service. This service is based on the deep learning
+       technology.
+     - This can be used to detect objects in the images
+     - This can be used to detects attribute of face , i.e if eyes are open.
+     - This can also used to detect similar faces in the collecion and
+       and detect explicit content.
+
+   AMAZON COmprehend:
+      - This service can be used extract insights about the content of the documents
+      - This can be used to process any text based document of format utf-8
+      - This can also dtect keyphrases, languages , snetiments and other elements within the 
+        document.
+
+   AMAZON MAchine learning services:
+      - CLoud based service that can be used by developer.
+      - Developers can use visualize tools and wizards to create machine learning models.
+      -  With this service you  can prepare your data and create machine learning model 
+      out of the data.
+
+      - AN also can be used to genrate predictions using machine learning models.
+
+
+
+
+=========================================================================================
+   2.3 Solution to meet performance Objectives: - Amazon Athena
+=========================================================================================
+
+ - An interactive   Query service that make it easy to analyse the data from s3 buckets.
+     - Athena directly queries S3.
+     - Athena can query structured and unstructured data.
+     
+     USE CASE:
+         - very useful when we have large chunk of data in the form of files. (Upload the files to bcuket)
+         - Just in case of cloud trails upload the log file to s3 bucket and we can start quering the data.
+ 
+     Limitations:                             
+       - Athena doesnot support different storage classses within the bucket,
+       - doesnot query previous versions,
+       - doesnot support requestor pays buckets,
+       - if data is encrypted it must be stored in the same region.
+=========================================================================================
+   2.3 Solution to meet performance Objectives: - Amazon Workspaces
+=========================================================================================
+
+  - This is a service to create virtual Microsoft windows or linux desktops for users
+  - Users can access their virtual desktop right from theier browsers.
+  - For windows based applications yuo can bring your own applications or licenses.
+
+   Implementation:
+    - goto amazon workspaces
+    - create directory 
+    - create vpc range
+    - create users with email address
+    - launch workspaces (may take upto 20min.)
+    - connect to virtual workspaces using the details sent through email.
+
+    Make sure to delete both workspace and directory for remiovig workspaces.
+
+
+=========================================================================================
+   2.3 Solution to meet performance Objectives: - Amazon App Stream
+=========================================================================================
+  
+   - This is fully managed application streaming services.
+   - This service can be used to proivde users with access to desktop applications from anywhere.
+   - No maintaince is required for underalying infrastrucuture.
+   - Exisitng desktop applcaition can be added using this services and can be streamed
+     to users via app stream 2.0 client or browsers.
+
+   implementation:
+    - create a stack first and then create a fleet with with an image and no. of 
+    instances and create a fleet.
+    - goto stack and associate the fleet with the stack by clickin gon the actions.
+    - then add the uers and get the url and use that url to access the desktop.
+
+=========================================================================================
+   2.3 Solution to meet performance Objectives: - AWS Kinesis Data Stream
+=========================================================================================
+  
+   - This is a service that is used to collect and process the large streeam of data
+     records on realtime.
+
+   - You can use this service to build systems that can  send and consume data in realtime.
+
+   - You can have continuous stream of data inflow into amazon kinesis data stream
+     data could include applcation logs, social media, web clickstream data.
+
+   - you can then have consumers that can take this data and process them in real time.
+
+
+   LOG DATA -> AWS BATCH -> This runs on a schedule. Not an effective means of being 
+                            able to analyse data in real time.
+
+   LOG DATA -> AMAZON kinesis Data Stream -> AWS LAMBDA -> DB store (ex - AMAZON Dynamo DB)
+
+   features:
+   - AMAZON kinesis has the ability to ingest large amounts of data in realtime.
+   - This is not persisting data . the max. retntion period for data is 7 days.
+   - to publish or consume data , you have to develope your own applications. 
+
+   - there are four types:
+           - DATA STREAMS:
+                - create shards 1mb/sec write (1000 rec/sec) and read 2mb/sec.
+                - later we can push data this data stream and invoke lambda functions.
+                  or own applications if we have.
+                - and push the data to cloud watch.
+
+                EX: sample command to push data to kinesis streams.
+
+                aws kinesis put-record --stream-name <stream Name>  --partition-key 1 \
+                --data "this is test data"
+
+                NOTE: if data is inserted we get sequence no. and shard id.
+           - DATA Firehouse:
+           - DATA Analytics:
+           - Video Streams:
+
+=========================================================================================
+   2.3 Solution to meet performance Objectives:  - kinesis Data Firehouse
+=========================================================================================
+
+ AMAZON kinesis Data Firehouse:
+     - This is fully managed service that can deliver real time streaming data to the 
+        Amazon S3 , AMAZON redshift,  Amazon elastic Search and Splunk.
+
+ 
+LOG DATA -> AMAZON kinesis Data Stream -> AMAZON kinesis Data Firehouse -> 
+            AWS LAMBDA -> DB store (ex - AMAZON Simple Storage service)
+
+          Implementation:
+             - create delivery stream 
+              - select a source (s3 or datastream if already create as above etc.,)
+              - choose invoke trigger if required (not mandatory):
+                  - to transform source records or convert record format.
+              - select the destination:
+                  - Amazon S3, 
+                  - AMAZON redshift,
+                  - Amazon elastic Search
+                  - Splunk.
+              - You can setup buffer size(1-128mb) and interval (60-900seconds)
+              - you can also enable compresion, encryption and error logging 
+              - create the delivery stream
+
+
+ 
+=========================================================================================
+   2.3 Solution to meet performance Objectives:  - Instance Types
+=========================================================================================
+
+   Instanes Types:
+        - General Purpose: 
+            - These provide balance of compute, memory and networking
+            - Some instance support tupto 25Gbps of network bandwidth
+            -> t,m   
+            -> a1, t2, t3, m3, m4, m5 
+            -> low-traffic-websites,web-applications 
+            -> small and mid range db's
+        - compute optimized: 
+           - Ideal for those applications that need High performance
+           - Good for batch processing workloads, high performance computing, media transcoding
+          and gaming servers.
+            -> c    
+            -> c3,c4, c5      
+            -> high performance frntend fleet of web servers and also for video encoding
+        - memory optimized : 
+             - ideal for those that need to proocess large datasets     
+            -> x,r   
+            -> r3,r4,r5,x1         
+            -> high performance databases, distributed mem caches, realtime big data analytics.
+        - storage optimized: 
+            - ideal for those applications that require high sequential read and 
+              write access to large datasets on local storage.
+            -> i,d   
+            -> i2,d2       
+            -> data warehousing , log or data-processing applications
+        - accelerated computing : ideal for those applications that need harware processing
+            -> p,g,f -> p2,p3,g2,g3,g4
+            -> 3d applications streaming , machine learning or deep learning or High performance
+               computing
+
+=========================================================================================
+   2.3 Solution to meet performance Objectives:  - API gateway AWS Lambda
+=========================================================================================
+
+   API Gateways: serverless technology
+       - This service is used for creating, publishing, maintaining, monitoring and 
+         securing both REST and WebSockets API.
+       - API Gateways is capable of handling 100's of thousands of concurrent API calls.
+       - It has feature such as :
+          - traffic mgmt 
+          - acces control
+          - monitoring
+          - api version mgmt
+       -  using API Gateway you can access the workloads that are running on the 
+          EC2 instance, Lambda or any other web application.
+   LAMBDA:
+     - This is a serverless computing
+     - This is where you can run your code on AWS.
+     - It runs code on HA infrastructe and it is manged byaws.
+     - costs can be reduced by running in LAMBDA instead of ec2 instance.
+     - Max. Executing time 15min. and max. memory assignment -3GB
+
+   Implementation:
+      - goto LAMBDA Service:
+      - create a function name <functioname>
+      - choose the runtime
+      - choose execution role - lambda will create an execution role
+        name <functioname> with permissions to upload logs to Amazon Cloudwatch Logs.
+      - create a function and add the function logic
+      - goto API Gateway:
+      - select REST API /web socket
+      -  Click on build -> create an api and give a name. and create.
+      - now got to the resource and create a method(GET,POST, PUT,DELETE etc.,)
+      - now click on the method (ex - get):
+           - now choose thintegration type;
+                - lambda function:  
+                    select the exisitng lambda funtion and click save.
+
+                - http
+                - mock
+                - mock service
+                - vpc link
+     -  now you can test the method and we can get the responses
+     - we can even deploy that api  - > click on actions -> create a stage -> and 
+       click on deploy , here we can find the invoke url and we can use that.
+=========================================================================================
+   2.3 Solution to meet performance Objectives:  - Labs AWS Batch
+=========================================================================================
+   - this is a service that allows you to run the batch computing workloads on AWS.
+   - here we can get large set of scompute resourecs for processing your workloads
+   - here we can submit jobs which can be:
+        - shell script        
+        - linux executable
+        -  or docker container images
+
+   - implentation:
+       - define a job
+       - select the job runtime
+       - select container image and   command to executable
+       - select compute , memory, network, subnet, job attempts, roles etc.,
+       -  you can see the executed jobs on the dashboard by clicking jobs
+
+
+=========================================================================================
+        3.Migration Planning: - Data Transfer methods
+=========================================================================================
+       
+        AWS SNOWBALL:
+            - This is a physical storage device , can be used to transfer large amounts
+              of data between s3 and on-premise data centre.
+            - upto 80TB of data can be transferred. if we have limited bandwidth we can 
+              use this
+            - if we have < 10TB , Then snowball is not economical.
+            - data is encrypted on the device.
+        AWS SNOBALL EDGE:
+            - This is similar to snowball , but it has on-board storage and compute power as well.
+            - along with data transfer you can perform edge computing workloads
+            - It has 100 TB of storage.
+            - Network adapters transfer speed upto 100 GB/second
+        AWS SNOWMOBILE:
+            - You can use this to transfer 100 PB of data.
+            - This would normally take years to transfer through 1GBPS connections :D
+              but with this service it can upto a few weeks.
+        AWS S3 Transfer acceleration:
+            - This is useful when you want to transfer files from s3 ian remote region.
+            - Here files will be transferred to a closest edge location and
+             from there ddata is transferred through the AWS optimized network.
+            - This is ideal for GB or TB of data on regular basis. or if you have 
+            centralized bucket where your user needs to upload the data.
+
+
+=========================================================================================
+        3.Migration Planning:  - Database Migration Services
+=========================================================================================
+
+    - This is service that helps in migrating:
+       - relational databases.
+       - data warehousing
+       - NoSQL DB and other data stores as well.
+
+    - You can use AWS Cloud or onpremise data stores as your source or destination
+    - if you need to change databases engines, you can use AWS Schema donversion tool
+      to convert the schema to target DB platform.
+    - There is also support for following as source:
+       - Oracle
+       - Microsoft sql server
+       - MySQL
+       - PostGRESQL
+       - MariaDB       
+       - SAP ASE
+       - MongoDB
+       - Amazon Aurora.
+    - There is also support for following as Destination:
+       - Oracle
+       - Microsoft sql server
+       - MySQL
+       - PostGRESQL
+       - AMAZON redshift
+       - s3
+       - DyanmoDB
+
+
+    AWS DMS ->   Source EP <--> Replication instance <--> target EP
+    Source DB <--> [AWS DMS] <--> Target DB
+
+    Majority of data is tansferred using SNOWBALL or SNWBALLEDGE from on-premise to cloud 
+    or vice versa i.e initial chunk of data , remaining data can be transfered through 
+    DMS  (AWS DATA Migration Service)
+
+    using EP(Endpoints) we can transfer data from one cloud to another cloud as well.
+
+    Implementation:
+       - Goto AWS DATA MIGRATION Service
+       - Create a replication instance 'dms.xlarge' for example and vpc etc.,
+       - Give source EP and give target EP details and test connectivy from both source and 
+          target sides.
+       - create a task to trnasfer the data.
+
+
+    
+=========================================================================================
+        3.Migration Planning:  - Migrating Workloads uses cases
+=========================================================================================
+ example 1:
+    - a compny wants to migrate workloads(.net and cassandra) from AZURE to AWS. 
+     conditions:
+        - no administrtion overheads
+        - no code changes
+     solution:
+       DO's:
+          - moving .net to elastic bean stalk
+          - moving cassandra to DynamoDB
+          - you can use databse migration utility to migrate database
+            also you can use AWS schema conversion tool to migrate schema b/w the db engines.
+       Dont's:
+          - Moving to ec2 is not recommended as it involve administarion overheads.
+
+example-2:
+   - a COMPANY HAS LARGE SET OF DOCUMETNS that needs to be migrated to AWS.
+   condtions:
+      - They need datastore to be highly available and scalable
+      - data must be encrypted at rest and in transit.
+      - company wants to ensure that they manage encryption keys.
+    solution:
+       Do's:
+          - AMAZON s3 can be used to store documents
+          - AWS KMS can be used for encryption.
+       DOnt's:
+         - Moving to ec2 instance with EBS not recommended
+         - Amazon Dynamodb cant be used , it s not for storing documents.
+
+  example-3:
+     - A company has on-premise DB of 10TB size.
+     - db engine PostGRESQL
+     - company has 50MB internet connection link.
+     - The company dattransfer securely and reliably and cut iver must be down in aweek.
+     NOTE: DB is large and internet bandwidth is not adequate
+
+     solution:
+       Do's:
+         - use snowball to upload to s3
+         - import data from s3 to red
+         - use AWS Data migration service for delta changes.
+      Dont's:
+         - using  AWS Data migration service alone to trnasfer data is not recommended
+           since it has limited bandwidth.
+
+
+
+    
+=========================================================================================
+        4. Cost Control:  - AWS cost Explorer
+=========================================================================================
+
+=========================================================================================
+        4. Cost Control:  - Cost Consideration
+=========================================================================================
+
+=========================================================================================
+        4. Cost Control:   - EC2 Cost optimization
+=========================================================================================
+
+=========================================================================================
+        4. Cost Control:   - S3 Intelligent tiering/storage classes
+=========================================================================================
+ 
+
+=========================================================================================
+       5. Continuous Improvement for Existing Solutions: - Elastic beanstalk
+=========================================================================================
+
+
+- No need to worry about the infrastructure, 
+ you can quickly deploy and manage your applicaiton.
+
+     - Elastic Beanstalk supports applicaitons developed in:
+            - java
+            - go
+            - .NET
+            - nodejs
+            - php
+            - python
+            - PHP
+            - Ruby
+            - dOCKER 
+            - mULTI CONTAONER DOCKER
+            - gLASS fiSH
+            - tOMCAT
+
+      - Configuring Blue green deployments:
+           - This service also has the feature know as BLUE/GREEN Deployments
+           - This service also has feature known as Swap environment URL's
+           - In Elastic Bean Stalk you can have two environments.
+           - When we use the SWAP Environment feature, the CNAMEs of the two environments
+            are swapped which would cause traffic to be redirected to the new version.
+
+=========================================================================================
+       5. Continuous Improvement for Existing Solutions: - Elastic CONTAINER SERVICE
+=========================================================================================
+
+   - Here you can run the docker based applications.
+   - Create a Service using container images and task def file.
+   - once created click on service and sclick on tasks check for the public IP
+   - Access the url.
+
+=========================================================================================
+       5. Continuous Improvement for Existing Solutions: - AWS Ops Works
+=========================================================================================
+
+
+
+=========================================================================================
+       5. Continuous Improvement for Existing Solutions: - Improving Network Performance
+=========================================================================================
+
+  Enhanced Networking:
+    
+   - This is a feature that can be used for EC2 instance to provide higher bandwidth,
+     higher packet per second performance.
+   - It can also be used to provide lower instance latencies.
+   - There are instance types that can support upto 100Gbps (m5dn.24xlarge 96vcpu,384gb) 
+     via Enhanced Networking.
+  
+  Placement Groups:
+
+   - When you want to place the instances together this feature should be used.
+   - There might be requirement wherein you have an application that is making use
+     of multiple EC2.
+   - You can get higher thorighput and lower latency by using placement groups.
+
+=========================================================================================
+       5. Continuous Improvement for Existing Solutions: - Compute HA
+=========================================================================================
+     - using Muliple Availability Zones.
+     - using the Load balancer.
+     - using Autoscaling Groups.
+
+    
+=========================================================================================
+       5. Continuous Improvement for Existing Solutions: - EBS HA
+=========================================================================================
+   - An EBS Volume is created in an Availability ZONE
+   - Data is replicated within the zone itself to prevent data loss.   
+   - There is also 'Delete on termination flag', if this is not enabled, EBS persists
+   even after the EC2 is terminated.
+   - You can backup data for EBS by creating snapshots
+   - You can also copy the data to another region for disaster recovery.
+
+     - Standard RAID configuration an be used for EBS Volumes (done on software layer)
+        RAID 0  - This is used when I/O Performance is more important than fault Tolerance
+                - This is ideal when EC2 instances are hosting databases
+                - If single volume is lost all data is lost.
+        RAID 1  - This is used when falut tolerance is more important.
+                - Since data is written to multiple volumes at a time.
+                - More bandwith from EC2 to EBS is required.
+
+=========================================================================================
+       5. Continuous Improvement for Existing Solutions: - AWS Storage Gateway
+=========================================================================================
+   AWS Storage Gateway:
+      - This is service used to connect from on-premise to Cloud based storage devices.
+      - This is a cost effetive option for companies that need to extend their on premise
+      storage.
+      - Instead of buying extra on-premise storage we can use cloud service.
+      - Different Types:
+          - File gateway:
+              - This gateway supports a file interface to the Amazon Simple storage service.
+              - Here you can retrieve objects into Amazon s3 using the standard file
+                Protocols such as Network FIle systems and Server Message Block.
+              - Here an applicance need to be deployed into your on-premise environment,
+              either on VMWare environment or Hyper V
+              - You can mount a file system volume on to S3
+          - Volume Gateway:
+              - This gateway supports the creation and usage of volumes that can be
+                mounted as Internet small computer system Interface (iSCSI)
+              - Cached Volumes:
+                 - Here the data is stored in S3. At the same time , a copy of frequently 
+                   accessed data is stored locally.
+              - Stored Volumes:
+                 - Here all the data is stored locally. 
+                 - A copy of data is stored as point-in-time-snapshot to amazon s3.
+           - Tape Gateway:
+                - This gateway supportd the ability to store the data effectievely in 
+                  GLACIER and Deep Archive.
+                - here company can make use of virtual tape infrastructure
+                - it removes the burden of having to maintain the tape infrastructure
+
+  
+=========================================================================================
+       5. Continuous Improvement for Existing Solutions: - EFS
+=========================================================================================
+ 
+create EFS and follow the steps below to attch the efs to ec2
+    NOTE: https://github.com/aws/efs-utils
+    To build and install a Debian package:
+$ sudo apt-get update
+$ sudo apt-get -y install git binutils
+$ git clone https://github.com/aws/efs-utils
+$ cd efs-utils
+$ ./build-deb.sh
+$ sudo apt-get -y install ./build/amazon-efs-utils*deb
+  #To mount the file system:
+  sudo mkdir efs-mount-point/
+ sudo mount -t efs <DNSoffilesystem> efs-mount-point/
+
+
+=========================================================================================
+       5. Continuous Improvement for Existing Solutions:  - Serverless Application Model
+=========================================================================================
+
+=========================================================================================
+       5. Continuous Improvement for Existing Solutions:  - Network Devices HA
+=========================================================================================
+
+   - With NAT Instances, you need to maintain the HA of the instances.
+   - The NAT GAteway itself is a Highly Avilable and scalable service.
+   - You can spin up a NAT Gateway in each availability zone for more resilient architecture.
+
+
+=========================================================================================
+       5. Continuous Improvement for Existing Solutions:  - AWS Tools
+=========================================================================================
+   
+   - Amazon Connect:
+       - Cloud based contact center solution
+       - Here it is easy to setup a contact centre, add agents and start interacting with 
+         customers
+       - This service also provides metrics and real time reports that can be used to optimized
+         contact routing.
+       - Pay only for waht you use.
+       - You can create a flow that allow you define entire customer service.
+
+   - Amazon Chime:
+      - This is a communication service
+      - This can be used to conduct online meetings, video conferencing and Chats.
+      - Content will be shared both insied and outside of the organization.
+      - This is fully managed service.
+
+   - Amazon Workmail:
+      - Business email with calendar support
+      - Support for exisitng mobile email clients and desktop 
+      - Users can use microsoft outlook to access their email, contacts and calender.
+
+   - Amazon WorkDocs:
+      - fully managed Storage sharing service
+      - Here files are stored in Cloud in a safe and secure manner.
+      - Here you can collabrate with other members of organization by sharing files.
+
+
+=========================================================================================
+       5. Continuous Improvement for Existing Solutions:  - Improving Performance of 
+                                                                Applications
+=========================================================================================
+   
+   AWS X-RAY:
+      - here you cn get detailed perforamnce trace for your applicaitons requests
+      - This is a service that you can use to see the performance of your applications.
+      - You can use AWS x-ray SDK along with your applications.
+      - You can use x-ray with aws lambda
+
+  Use Right Instance and volume Type:
+      - Use compute optimized instances types.
+      - Use provisioned IOPS SSD for your volumes to improve performance.
+      - Use AWS CloudWatch metrics to monitor your compute and volume storage.
+      
+
+   RDS:
+
+   -'Performance Insights' can be used to analyse database load
+
+   - Performance Insights:
+
+       Performance Insights is a database performance dashboard designed to help customers 
+    quickly assess performance on their relational database workloads and guide customers 
+    as to when and where to take action. Performance Insights collects detailed database 
+    performance data through light weight mechanisms and presents it in an intuitive 
+    graphical interface.
+
+   - It can aslo be used to troubleshoot database load.
+
+   - You can also get performance metrics for diferent SQL Statements.
+
+
+
+
+

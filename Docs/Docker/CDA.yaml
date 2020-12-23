@@ -1,0 +1,382 @@
+     CDA - certified docker associate: 90 min. 55Q
+         
+          - Orchestration: 25%
+          - Image creatiion, Mgmt, Registry: 20%
+          - Installation and  Configuration: 15%
+          - Networking: 15%
+          - Security: 15%
+          - Storage and Volumes: 10%
+          
+     Container format:
+         - The default contianer format is lib container and combine the following
+         - Namespaces and control groups: (CGroups)
+             - namespaces: limits what container can see, ex: PID, N/w interfaces/ interprocess comm, file sysytem and mount points
+             - Cgroups: limits the cpu and memory block io and network
+         
+         - Union mounting is a way of combining multiple directories into one that appears to contain their combined contents.
+         
+     Images and continaners:
+         - Readonly templates with instructions for runnning a Docker Container.
+         - Hihgly portable can be shared , stored and updated.
+         - One image can be based on other image with some additional customization.
+         - Multiple container can access  the sane undelaying image and yet they have their  own data state.
+         
+     VM vs Containerization:
+         - Docker containers are executed with docker Engine rather than  HYpervisor.
+         - Docker containers are able to share the OS kernel, 
+         - VIrtual machine uses hyper visor and each VM has its own kernel and OS.
+         - Containerization is a abstraction of application layer that packages code and dependencies together.
+         - VIrtualization is abstarction of physical hardware turning one server into many servers.
+         - Containers take less space than VM's and is about 10's of MB
+         - Containers take seconds to start , where as VM's takes minutes.
+         - Containers are very light weight.
+         - Containers support micro service architecture.
+
+
+     Docker eco-System:
+
+        - Service Discovery:
+             - Generally load is blanced across many hosts.
+             - Service Discovery enable app consumers to  learn about location of the devices providing the application.
+             - Containers providing a particular application, register themselves so that other toolsknow about their avialbility.
+             -  This makes scalble and flexible
+        - Load balancing:
+           - Distributes applicationtraffic across multiple backends.
+           - Keeps a list of service backends with their IP address and port Location.
+           - Continuous health Testing of backends to ensure they respond to requests correctly.
+           
+        - Orchestration:
+           - Automated Configuration, Coordination andmanagement of the backend servers which collectievely provides a service.
+           
+           - Important responsiblities of Orchestration tools are:
+               - Provisioning and deployment.
+               - Scaling up/down containers.
+               - Allocation of resources.
+               - Movement of containers from one host to another.
+               - Availability of the containers.  
+               
+           - Popular orchestration Engines: Docker swarm, Kubernetes, Apcahe MESOS/Marathon
+           
+           
+     Docker Installation:
+          - Docker support two types of Editions:
+              - Community edition:  
+                  - it has three update channels
+                        - stable: lateset release for general availability.
+                        - Test: Beta
+                        - Nightly: alpha
+                   - Ideal for small developers and teams expermenting with container based apps.
+              - Enterprise edition:
+                     -  ideal for production and enterprise developments and deploymetns.
+              
+          - Platform and requirements:
+                - Supports all majotrversion of linux.
+                - The os kernal mustsuuport the namespaces, cgroups(control groups) , appropriate storafge drivers ex - AUFS
+                - Currently supprts 64bit architecture only.
+                - 
+         Docker instalation commands for centos:
+         
+         #sudo yum install -y yum-utils device-mapper-persistence-data lvm2
+         #sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+         ## saved the repo to /etc/repo.d/docker-ce.repo
+         #sudo yum-config-manager --enable docker-ce-nightly
+         #sudo yum-config-manager --disable docker-ce-nightly
+         #sudo yum-config-manager --disable docker-ce-test
+         
+         #To see the list of avilable versions:
+         #yum list docker-ce --showduplicates | sort -r  
+         #sudo yum install docker-ce-18.09.3 docker-ce-cli-18.09.3 containerd.io
+         #To install  latest version
+         #sudo yum install docker-ce docker-ce-cli containerd.io
+         #sudo systemctl start docker
+         #sudo systemctl enable docker
+        
+        mange docker as a non-root -user:
+        
+         - The docker daemon always runs as the root user.
+         - Create a UNIX group called Docker and add users to it.
+         - The docker group grants privilige equivalent to the root user.
+         - Add your user to the 'docker' group.
+             sudo usermod -aG docker <Username>
+         - Ensure docker is ready.  
+             ``` docker info ```
+         - run a docker commadn without sudo
+        Other ways of installing docker :
+           - from rpm (redhatpackage managers)
+               - manage upgrade manually
+           - install from convinient scripts:
+               - get.docker.com
+           
+           
+        Docker containers:
+          - docker attach vs docker exec:
+             - docker run -it <imageName> # enteres into shell mod of container. creates only one session of shell (ps -ef)
+             - docker attach <containerID> #creates only one session of shell 
+             - docker exec -it <containreid> bash #creates two session of bash.
+          - docker container name and hostname:
+              #docker run -it --name webserver --hostname test -d -p 80 nginx
+              #This above command automatically assign the hostport ,check with 'docker ps' command 
+              #to see the allocated hostport no.
+             
+          - docker stats:
+              #to see the docker mem and cpu utilization
+              ```docker stats <containerID> ```
+              
+
+        Docker networking:
+        
+          - Three typs of networks exists on docker:
+               - bridge n/w:
+                  - defult n/w  172.17.0.0/16 
+                  - we need to publish the private containr port using -p <portno>
+                  - IP to the network in automatically assigned by DHCP internally.
+               - host n/w: 
+                   -  default no IP is assigned . it takes the host IP and the host port. directly you can connect 
+                      to the continer just like an other process running on the hosts.
+                   -  creates a container sam like a process on the hosts and shares the hosts network.  
+                   -  There is no isloation between the host and the container.
+                   - 'docker run -it --rm --network=host --name=nginx nginx;' # this command will run
+                      if the default port is not used by any other process.
+               - none:
+                   - to disbale the network for docker container we can use none network
+               
+          #commands:
+             - 'docker nertwork inspect bridge' to see the ip address of containers.
+             - 'docker inspect <containerid>'  to see the network and other details.
+             
+          
+          - How to remove none network and add bridge n/w to the container.
+               - Start a container on the docker host.
+                   'docker run -itd --rm --net=none -p 8080 tomcat'
+               - disconnect the none nwetwork.
+                   'docker network disconnect none <containerid> or <containerName>'
+               - Add the bridge network and Inspect again.
+                   'docker network connect bridge <containerID>'
+              
+           Overlay networks:
+             - The network that are built on the physical network are called overlay network.
+               'docker network create --driver=bridge  subnet=172.99.11.0/24 --gateway=172.99.11.1 new_bridge-2'
+             - 'docker network prune' -prunes the custom networks which are not utilized by any containers.
+          
+          
+
+        Docker Images:
+           - Readonly templates for running docker containers.
+           - writable layers gets created once the image is run as a container
+           - Registry holds repositories
+           - repositories hold images.
+           
+         commands for docker images:
+            - docker images ls --filter "before=s3df1dsf53"  #shows the images downloaded before that image
+            - docker images ls --filter "since=s3df1dsf53"  #shows the images downloaded AFTER that image
+            
+          Dangling images:
+            - dangling images means creating new image with same name which exists already. Then the older image called as dangling image and it is saved as 'none'
+            
+             #command to see the dangling images:
+                - docker images --filter "dangling=true"
+             #command to print the output in specified format
+                - docker images --format "{{.ID}}:{{.Repository}}"
+             #Command
+                 - docker images prune  #remves all unused and dangling images
+                     
+         Dockerfile:
+            -  images are built using docker build command
+            -  Build context is set of files at either.
+                 - Specified location path.
+                 - URL  - Git repository location.
+            - The build is run by docker daemon not the docker CLI.
+            
+            - SampleDocker file
+               .dockerignore file   - used to ignore file while building an image
+               ARG CODE_VERSION=latest
+               FROM <image>:CODE_VERSION
+               #following commands support command type and shell type
+                RUN <command> <flags> <parameters>  or ["command","flag","param1"]
+                CMD <command> <flags> <parameters>  or ["command","flag","param1"]
+               # when used with ENTRYPOINT , CMD provides the default parameters.
+               # There can be only on CMD instrcution in the dockerfile. if we use multiple CMD then it takes the last CMD
+                ENTRYPOINT <command> <flags> <parameters>  or ["command","flag","param1"]
+               #ENTRYPOINT   sets the commands & parameters that will be executed first when a container is run.     
+                ENV <key>=<value>
+               #there can be one or more ENV variable set.
+                WORKDIR <path>
+               #we can use this multiple times in the docker file.
+                ADD <SourcePath> <DestinationPATH>
+               #add command adds files and directoried from the build environemnt to the image.
+               #ex: ADD abc.zip /usr/share/tomcat/webapps/
+                COPY <SourcePath> <DestinationPATH>
+               #Difference between COPY and ADD is that it doesn't have extraction or decompression capabilities.
+                
+           # commands: to build image from a docker file
+               docker build -t username/imagename:tag .
+               
+               docker image history <imageName>  # To see the layers of images an its memory size.
+           # docker commit or docker container commit
+              After making changes inside the docker container and if we want to persist the changes we can commit those changes using the docker commit.
+              
+              by default the container process will be paused while the image being commited.
+              
+              - docker contianer commit <imagename>   <username/image:tag>
+              - docker container commit --message="A new image"  --author="authorname" <imagename> <username/image:tag>
+           # The message we provided will be saved as the comment we can checkthat using the command   
+               docker inspect image  <username/image:tag> | grep -i Comment 
+ 
+     ---
+       DOCKER STORAGE:
+       
+          - Types of storage in Docker:
+              -  local storage for container:
+                 - Storage provided for docker image run.
+                 - Uses Storage Drivers to read filesystem layers from the contianres.
+             -  Persistence Data Storage:
+                 - saving the data beyond the container lifecycle.
+                 - Data is stored outised the container lifecycle.
+             - Static Image  storage:
+                 - Storing images in the registry.
+                 - ex: docker hub
+
+        #TO see the size of writable layer of containers 
+           docker ps -s #outputs the conatiner writable layer used size and virtualsize(image size)
+        #To format the output
+           docker ps -s --format 'table{{.Names}}\t{{.Images}}\t{{.Size}}'
+        #To see the total disk space used by all running contianers
+           docker system df  #shows the docker disk usage.
+        #To see the storage driver used
+           docker info | grep "Storage Drivers"
+
+      Types of stoarge Drivers:
+         - overlay-2 : default driver for 18.09 recommended - file level storage
+         - AUFS: default for centos7 - - file level storage
+         - device-mapper: default for centos7 may deprecate in future. - block level storage
+         - Btfrs & ZFS: -support snapshots -  - block level storage 
+         - Vfs: only for testing purpose not recommended for production
+
+      How to change the storage driver:
+         - Change the default stoarge form overlay2 to device mapper.
+         - default directory for Docker:
+             /var/lib/docker/
+         - By changing the storage drivers, all current  docker resources (containers and images)
+           will be unavilable for accessing with new storate driver.
+         - Process: - manual process
+              - Export the data
+              - Stop Docker
+              -  Edit  /etc/docker/daemon.json #if not present then create this file 
+              #add the below content in it
+              {
+                "storage-driver":"devicemapper"
+              }
+
+              - start the docker
+              - check the status of docker.
+         - Proces: command mode
+            - stop the docker
+            - run the command :
+                 dockerd --storage <storagedrivername>
+     
+     Docker drawbacks of storage:
+        - Downside storing the writable layer of the  container:
+             - data is not persistent when the container is removed.
+             - Writable layer is tightly coupled to the host machine.
+             - performance impact for write-heavy workloads.
+     
+     Persistence Storage:
+        - Volumes provide persistent storage.
+        - Allow to share data among other containers.
+        - Can be managed using the docker CLI
+        - Volumes does not increase the size of the containers using it. 
+        - Docker volume plug-in allow you to provison and mount shared storage.
+          such as iSCSI, NFS, FC.
+        - Data is translated by volume driver plug-in, which is then accessed by the container.
+
+    Manage Applicatiom Data:
+        - Volumes:
+            - Stored in the docker managed file system.
+            - Support use of volume drivers.
+        - Bind Mounts:
+             - Stored anywhere on the host system.
+        - tmpfs Mounts:
+             - Stored in host system's Memory.
+    
+    #Commands to create docker volume
+      docker volume create <volumename>
+
+    #To see the list of docker volume
+      docker volume ls 
+
+    #assging volumes to the container to tore data on host and this will name volumes with some hash code
+      docker container run -d --name mysql3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v /var/lib/mysql mysql
+
+      #NOTE: in the above command /var/lib/mysql directory is inside the container
+      #on the hosts it is stored in /var/lib/docker/volumes/  #since we didn't mention any name 
+      #hashcode name will be present in that directory and inside that _data directory we can have content from container.
+
+      #To Know exact path of the volume you can trace using 'docker inspect <containerid>' command
+
+      #named volumes:  -v tag is used to give location to store data and name that data volume..
+        docker container run -d --name mysql3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v mysql-db:/var/lib/mysql mysql
+      #OR we can do it using mount command
+        docker container run -d --name mysql3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True --mount type=volume, source=mysql-db, \
+        target=/var/lib/mysql mysql
+
+      #To Know exact path of the volume you can trace using 'docker inspect volume mysql-db' command for the 
+      #above container. Check the 'mountpoint' for the path.
+      #possible path on host would be /var/lib/docker/volumes/mysql-db/_data
+      #Whatever data stored inside the container /var/lib/mysql/ would be saved in the above location on hostPath.
+
+      NOTE: Docker volumes can't be deleted unless the container is stopped and removed.
+
+      #assging volumes to the container to tore data on host and this will name volumes with some hash code
+      docker container run -d --name mysql3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v /var/lib/mysql mysql
+
+      #NOTE: in the above command /var/lib/mysql directory is inside the container
+      #on the hosts it is stored in var/lib/docker/volumes/  #since we didn't mention any name 
+      #hashcode name will be present in that directory and inside that _data directory we can have content from container.
+
+      #To Know exact path of the volume you can trace using 'docker inspect <containerid>' command
+
+      Named Volume Mounts:
+      #named volumes:  -v tag is used to give location to store data and name that data volume..
+      docker container run -d --name mysql3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v mysql-db:/var/lib/mysql mysql
+      #OR we can do it using mount command
+      docker container run -d --name mysql3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True --mount type=volume, source=mysql-db, \
+      target=/var/lib/mysql mysql
+
+      #To Know exact path of the volume you can trace using 'docker inspect volume mysql-db' command for the 
+      #above container. Check the 'mountpoint' for the path.
+      #possible path on host would be /var/lib/docker/volumes/mysql-db/_data
+      #Whatever data stored inside the container /var/lib/mysql/ would be saved in the above location on hostPath.
+
+      Bind Mounts:
+      #bind Mounts: To give common directory to both container and host
+      docker run --rm -itd -v /home/mount/vol1:/app nginx
+
+      #If we use the bind mount options , then it won't list in the docker volumes list
+      docker volume ls # this command wiol not show any volumes if we use bind mount options
+
+      #bind ounts using mount tag
+      docker run -itd --mount type=bind,source=/home/mount/vol2/config.txt,target=/app/config.cfg nginx
+
+
+      Multiple mounting volumes:
+      #We can mount multiple volumes:
+       docker run -itd --rm   --mount source=test-vol-1,target=/app1 \
+       --mount source=test-vol-2,target=/app2 nginx
+
+      tmpfs Mount:
+      #To mount the tmpfs mount volume
+       docker run -itd --mount type=tmpfs,destination=/app tomcat   
+       #Note: here there is no source , becuase source is RAM
+
+      #To delete the docker volumes 
+      docker volume rm <volumename>
+
+      #TO delete all the volumes that are not being used by the containers
+      docker volume prune
+
+      NOTE: Docker volumes can't be deleted unless the container is stopped and removed.
+
+      External Storage:
+       we can use the external storage using docker volume driveres. check the documentation sections.
+
+     

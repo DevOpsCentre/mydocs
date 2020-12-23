@@ -1,0 +1,736 @@
+==========docker installation============================
+#TO remove older version of docker in cent os 
+sudo yum remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-engine
+
+#TO remove older version of docker in ubuntu os 
+sudo apt-get remove docker docker-engine docker.io containerd runc
+
+#To install docker on cent os
+sudo yum install docker -y
+
+#To install docker on ubuntu os
+sudo apt install docker -y
+
+
+#To install latest version of docker using script
+#then go to https://docs.docker.com/
+
+ curl -fsSL https://get.docker.com -o get-docker.sh
+ sudo sh get-docker.sh
+ 
+
+#To check the version after installing 
+ docker --version #or
+ docker version
+#note: it will only give the client version if the docker service is not started.
+
+#TO start the docker service 
+service docker start
+
+#To add this to autostart on server restart
+sudo systemctl enable docker.service
+
+=============================================================
+#To check the docker running status
+ service docker status
+
+#note: if docker service is not running, then following commands will not work.
+
+#To check the version after installing 
+ docker version
+#note: after starting docker service , it shows both client and server versions.
+
+#To check the status of all running containers images  and metadata ..
+ docker info
+=====================docker images and containers========================
+#TO see list of images..
+ docker images 
+
+#To download an image from docker hub 
+docker pull <image-Name>
+#ex: docker pull ubuntu
+#in both the above cases it will download the latest version
+#ex: docker pull ubuntu:latest 
+#or 
+#if we want specific version then in place of latest mention version number/name
+#ex: docker pull ubuntu:18.04
+
+#TO delete downloaded docker images.
+ docker rmi <imagename>
+
+#To run image as a container 
+ docker run <image>
+#ex: docker run ubuntu
+#note: if we try to pull docker OS image and run using run command above
+#then it automatically stops running the image os.
+#it happens because docker is not intended to run OS but intended to run specific apps
+
+
+#To run nginx server image as a container 
+ docker run --publish 80:80 nginx  # --publish or -p 
+
+#the above command hangs the console to avoid that , we can 
+#run docker container in detached mode.
+
+#To run docker container in detached mode - in this mode docker runs in the background
+#and return back to the console. 
+#docker run -d -p <hostPort>:<containerPort> -name webserver <containerName>
+ docker run -d -p 80:80 --name webserver nginx # -d or --detach 
+ #or
+ docker run -d -p 8080:80 --rm --name apacheweb httpd:latest 
+ #note: --rm if this is used , when docker container is stopped, it
+ #automatically removes container image.
+
+#To bring the background container to foreground 
+docker attach <container-id>
+
+#To see list of running containers any of 3 below will work.
+ docker ps 
+#or 
+ docker container ps
+#or 
+ docker container ls 
+
+#To see list of all containers(both running and stopped) any of 3 below will work.
+ docker ps -a
+#or
+ docker container ps -a
+#or 
+ docker container ls -a
+
+#To stop running container 
+ docker stop <container id> # ex: docker stop 8as7d897s97sa7d7da98
+#note: container id looks like hashcode as shown in above example
+
+#TO delete multiple containers at a time ...  
+ docker rm <container-id> <container-id> <container-id>
+ 
+#To stop all containers at a time.
+ docker stop $(docker ps -q)
+
+#TO delete docker container
+#stop the container , then use following command
+ docker rm <contianerId>
+#Other we willll get an error like can't stop running container.'
+
+#TO delete docker container forcefully 
+ docker rm <container-id> -f
+#TO delete multiple containers at a time .. 
+ docker rm <container-id> <container-id> <container-id>
+ #or
+#To delete all containers at a time.
+ docker rm  $(docker ps -a -q)
+
+#TO see docker container logs 
+ docker logs <container id>
+
+#note: docker starts the containe using CMD command in image docker file.
+
+#To see all process running in docker (inside it runs with different process id)
+ docker top <container-id>
+
+#To see all process running in linux system
+ ps aux 
+
+#To RUN MYSQL 
+docker run -d -p 3306:3306 --name mysqlDB -e MYSQL_RANDOM_ROOT_PASSWORD=yes mysql
+#to check the root password check docker  logs.
+# look's like [Entrypoint]: GENERATED ROOT PASSWORD: iingie4cae5maWiiwoocee4IKiwaiwo3
+
+#To RUN apache 
+docker run -d -p 8080:80 --name webserver httpd
+#note: here 8080 is host portno. and 80 is container port 
+#the ip of docker container and host will be different. if we want to skip virtual network and use host ip  then --net=host
+
+#To see conatiner metadata ( details of container port networking status etc.,)
+ docker inspect <container-id>
+#to see spefic details (for example network ip)
+ docker inspect --format '{{.NetworkSettings.IPAddress}}' webserver
+ docker inspect <container-id> | grep IPAddress
+
+
+#To see docker container stats.. (show details of all running ocntainer cpu mem utilization , block i/o network i/o)
+ docker stats
+============to enter into running docker container ==========================
+#TO execute commands inside docker container to see hosts inside it
+docker exec <containerid> cat /etc/hosts
+
+#To enter into container ubuntu (-i for interactiv mode and 
+#-t for TTY bash shell and this will create a new container)
+ docker run -it --name ubuntu <container-id> 
+ #example: docker run -it --name ubuntu 987ds7787dsd78s9as
+
+#To enter into container other than ubunutu (here bash is mentioned 
+#because it is where we need to start
+#but for ubuntu no need to mention that , because it's default location)
+ docker run -it --name webserver <container-id> bash
+
+# to enter into container wtihout creating a new container.
+ docker exec -it <container-id> /bin/bash
+ 
+ #to exit from the container console 
+ #short cut 
+ ctrl+p+q
+====================================================================
+==================DOCKER NETWORKING================================
+#networking................
+#TO see which ports are directing traffic to container from host.
+ docker port <container-id>
+
+#To see all created networks of docker
+ docker network ls
+ 
+#o/p looks like following ..
+# =======================================================
+# NETWORK ID          NAME                DRIVER              SCOPE
+# d374b36031dd        bridge              bridge              local
+# 86ad4bba7820        host                host                local
+# c13ea4e57d9f        none                null                local 
+# =======================================================
+ 
+#name: bridge network 
+#note: docker runs on bridge network by default 
+#and network ipv4:172.17.0.0
+     #subnetmask: 172.17.0.0/16
+	 #gateway: 172.0.0.1
+	
+#name: host network	
+#to increase performance there is a virtual host network to establish 
+#connection b/w containers.
+
+#name: none
+#it is an extra interface like eth0 that is not connected to anything.
+
+#To inspect a network 
+ docker network inspect <name> 
+#note: running this command we can 
+#get the metadata of all networks on which contaner are running
+
+#To create a network 
+ docker network create <network name>
+ #example: docker network create my-network
+
+#To attach a n/w to container 
+ docker network connect  old-container-old-netwrok new-container-in-new-nwetork
+ #example: docker network connect a8sdysa90asd8 b23h9324h923h
+ #to check attached network:
+ docker network inspect b23h9324h923h
+ #check the meatadata it shows the attached n/w in network section.
+ 
+#To detach a n/w from container
+ docker network disconnect old-container-old-netwrok new-container-in-new-nwetork
+ #example: docker network disconnect a8sdysa90asd8 b23h9324h923h
+ #to check detached network:
+ docker network inspect b23h9324h923h
+ #check the meatadata it removes the previously attached n/w in network section.
+
+
+#To see the image layers
+ docker history <image-name>
+ 
+#To see the image meatadata
+ docker image inspect <image-name>
+ 
+===================================docker HUb===================
+
+#To login to docker HUb from docker CLI
+docker login 
+#enter username and password
+
+#docker authenticaiton url is stored in the .docker/config.json file
+#this is actual url to connect to docker hub dev/stage/prodcution
+
+#To logout of the Docker hub 
+docker logout
+
+#Docker image tagging
+#to upload into the docker hub we need to do the tagging ex: username/repo:tagname
+docker image tag nginx:latest princeanurag2011/nginx:dev-1-0 #tag or -t
+
+#upload image to the docker hub 
+docker push princeanurag2011/nginx:dev-1-0
+#note: to push to docke hub we should login to docker hub using docker login command.
+
+
+===============Docker images Building=================================
+# docker images can be build in 2 ways:
+# 1.0 DockerFile
+# 2.0 Docker Compose
+#
+1.0 ================Docker File===========================================
+#here is an example to create apache web server image using docker file.
+# -create DockerFile using the command 
+ vim DockerFile
+ #copy below content in it.
+-------------------------------------
+FROM centos:7
+RUN yum install -y httpd
+#COPY proxy.conf /etc/httpd/conf.d/
+EXPOSE 80
+CMD /usr/sbin/httpd -D FOREGROUND
+-------------------------------------
+
+#To build docker image
+docker build -t princeanurag2011/apache:dev .
+#note: in the above command - dot(.) at the end repressents
+#file from current directory.
+
+=======================================================================
+2.0 ============Docker persistence volumes =============================
+
+# Container Lifetime & Persistent Data: Volumes, Volumes, Volumes
+ default locations
+ var/lib/docker 
+   - aufs
+   - containers
+   - images
+   - 'volumes'
+
+## Persistent Data: Data Volumes
+
+#To pull official image from docker hub
+docker pull mysql
+
+#to see metadata of the image
+docker image inspect mysql
+
+#To run mysql DB
+docker container run -d --name mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=True mysql
+
+#To see the metadata of mysql image.. here check the volumes and mount data
+docker container inspect mysql
+
+#To copy files from local machine to docker image:
+ docker cp <filepath> <imageName>:<filepath>
+
+#To see the volume inforamtion like where data is being stored.
+docker volume ls
+
+#To see the volume inforamtion like where data is being stored.
+docker volume inspect <volume-id>
+
+#assging volumes to the container to tore data on host and this will name volumes with some hash code
+docker container run -d --name mysql3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v /var/lib/mysql mysql
+
+#NOTE: in the above command /var/lib/mysql directory is inside the container
+#on the hosts it is stored in var/lib/docker/volumes/  #since we didn't mention any name 
+#hashcode name will be present in that directory and inside that _data directory we can have content from container.
+
+#To Know exact path of the volume you can trace using 'docker inspect <containerid>' command
+
+Named Volume Mounts:
+#named volumes:  -v tag is used to give location to store data and name that data volume..
+docker container run -d --name mysql3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v mysql-db:/var/lib/mysql mysql
+#OR we can do it using mount command
+docker container run -d --name mysql3 -e MYSQL_ALLOW_EMPTY_PASSWORD=True --mount type=volume, source=mysql-db, \
+target=/var/lib/mysql mysql
+
+#To Know exact path of the volume you can trace using 'docker inspect volume mysql-db' command for the 
+#above container. Check the 'mountpoint' for the path.
+#possible path on host would be /var/lib/docker/volumes/mysql-db/_data
+#Whatever data stored inside the container /var/lib/mysql/ would be saved in the above location on hostPath.
+
+Bind Mounts:
+#bind Mounts: To give common directory to both container and host
+docker run --rm -itd -v /home/mount/vol1:/app nginx
+
+#If we use the bind mount options , then it won't list in the docker volumes list
+docker volume ls # this command wiol not show any volumes if we use bind mount options
+
+#bind ounts using mount tag
+docker run -itd --mount type=bind,source=/home/mount/vol2/config.txt,target=/app/config.cfg nginx
+
+
+Multiple mounting volumes:
+#We can mount multiple volumes:
+ docker run -itd --rm   --mount source=test-vol-1,target=/app1 \
+ --mount source=test-vol-2,target=/app2 nginx
+
+tmpfs Mount:
+#To mount the tmpfs mount volume
+ docker run -itd --mount type=tmpfs,destination=/app tomcat   
+ #Note: here there is no source , becuase source is RAM
+
+#To delete the docker volumes 
+docker volume rm <volumename>
+
+#TO delete all the volumes that are not being used by the containers
+docker volume prune
+
+NOTE: Docker volumes can't be deleted unless the container is stopped and removed.
+
+External Storage:
+ we can use the external storage using docker volume driveres. check the documentation sections.
+
+==================================================================
+2.0 ============Docker-Compose.yml =============================
+
+ -------- Installation --------------------------
+ 
+sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+sudo chmod +x /usr/local/bin/docker-compose
+
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+docker-compose --version
+
+------------to uninstall ------------------------
+sudo rm /usr/local/bin/docker-compose
+pip uninstall docker-compose
+---------------------------------------------------
+------------------------------------
+docker-compose.yml
+--------------------------------------
+---
+verison:'2.0'
+
+services:
+
+  wordpress:
+    image:wordpress
+	ports:
+	  - 8080:80
+	environment:
+	 WORDPRESS_DB_PASSWORD: example
+	volumes: 
+	  - ./worpress-data:/var/www/html
+	  
+  mysql:
+    image: mariadb
+	environment:
+	  MYSQL_ROOT_PASSWORD: example
+	volumes:
+	  - ./mysql-data:/var/lib/mysql
+------------------------------------------
+
+
+#To Setup volumes and networks and run all containers
+docker-compose up
+docker-composer up -d #To run in detached mode or background.
+
+
+#To remove volumes and networks and stop all containers
+docker-compose down
+	
+	
+=================Docker Swarm=====================================
+Why Orchestraitaion is needed?
+----------------------------------------------
+- To automate contianer life cycle
+- Scale  out/up/in
+- containre recreation if they failed
+- replace container withhout downtime(blue/green deploy
+- control/track where container s are running
+- create cross node virtual network
+- ensure only trusted servers run the containers
+- store secrets keys password and get them to the right container (and only that container)?
+
+--------------------------------------------------
+v1.13 (2017) docker swarm/node/service/stack/secret
+--------------------------------------------------
+Docker Swarm components
+Manager
+ -API  -- accepts command from client and creates service object.
+ -ORCHESTRATOR ---reconciliation loop for service objects and creates tasks
+ -ALLOCATOR  --allocates ipaddress to tasks
+ -SCHEDULER  --Assign nodes to tasks
+ -DISPATCHER --checks in workers
+NODE:
+ -WORKER
+ -EXECUTOR
+ 
+ Architecuture:
+Manager --> worker/node
+ 
+---------------------------------------------------------------
+----------------Docker swarm commands--------------------------
+
+#To start Docker Swarm and make it a leader
+docker swarm init
+
+#To start the swarm service 
+docker service <command> <image name>
+
+==<command>=====desc==============================================
+  create      #Create a new service
+  inspect     #Display detailed information on one or more services
+  logs        #Fetch the logs of a service or task
+  ls          #List services
+  ps          #List the tasks of one or more services
+  rm          #Remove one or more services
+  rollback    #Revert changes to a service's configuration
+  scale       #Scale one or multiple replicated services
+  update      #Update a service
+=================================================================
+===============running docker swarm on leader as node============
+#To Create a web service
+docker service create --name webserver -p 80:80 httpd:latest
+
+#To see the services running and no of replicas..
+docker service ls
+
+#To see the status of the replicas like on which node it is running..
+docker service ps <id>
+#or 
+docker node ps
+
+#To see service running on docker node 
+docker node ps <node-name>
+
+#TO See the  running  nodes in swarm
+docker node ls
+
+#To create the replicas to 3
+docker service update <id> --replica 3 #ex: docker service update 8t877887t87t --replica 3
+#or
+docker service scale <id>=3 #ex: docker service update 8t877887t87t=3
+
+#to update the docker service
+docker service update --image <imagename:tag> <servicename>
+
+#To update port no
+docker service update --publish-rm 8080:80 --publish-add 9090:80
+
+#To converge services automatically
+docker service update --force <servicename>
+
+#to rollback 
+docker service rollback <id> #ex: docker service rollback 8t877887t87t
+
+#To stop service
+docker service rm <id>
+#note: after creating replicas and if we try to stop container using command: docker container stop <dockerid>
+#it will create the replicas automatically.
+
+#To inspect the services 
+ docker service inspect --pretty <servicename>   #--pretty is used to display o/p in readable format
+#otherwise we get the o/p in json format.
+
+#we can drain the worker nodes 
+ docker node update --availability drain <nodename>
+
+
+#Docker scaling the replicas  and rolling updates
+ docker service create --replicas=5 --name nginxroll --update-delay 10s nginx:1.14
+
+#to update the image 
+ docker service update --image nginx:1.15 nginxroll
+
+
+--------------------------------------------------------------------
+====================================================================
+===========running docker swarm on multiple nodes===================
+
+#  Install docker on each node (best os to choose is ubuntu) Minimum no. of nodes should be 3
+#  To install latest production version  release use the following comand.
+    curl -sSL https:/get.docker.com/ | sh
+#  after instllation , start service using command
+    service docker start
+# To check whether docker swarm running status.
+    docker info | grep swarm -i
+# TO start the docker service docker swarm init 
+    docker swarm init --advertise-addr x.x.x.x  #(give ur machine public ip in place of x.x.x.x if nodes are on different network , if same network give private ip)
+# To add another node as worker run the following command on node.
+     docker swarm join --token SWMTKN-1-0ch9qaoavoknmp7mbyqyglpcxlh8u-4plhbu40pabr8mma9rvfjgnm8 x.x.x.x:2377
+     #note: token generated will be different on ur machine. 
+	 #on ur machine to get the token  run the below command on host machineonce you get the token run that command on node which we wanted to add.
+	 docker swarm join-token manager
+   
+# To check whether node is added or not check it using the command on the host 
+#  (where docker swarm init command is first executed. beacuase it will show data on only manger node.)
+    docker node ls
+# To Make node as manager
+    docker node update --role manager <hostname>
+	
+# To promote the worker node as master 
+   docker node promote <nodename> <nodename>
+# TO remove as manger 
+  docker node demote <nodename> <nodename>
+
+# To remove node from swarm , run the below command on node
+  docker swarm leave
+# TO remove node from list of swarm, run the below command on manager
+  docker node rm  <nodename>
+
+AUTOLOCK SWARM:
+   - we can enable the autolock feature  in the docker swarm.
+   - if this is enabled , then token is required for the docker swarm to unlock.
+
+   docker swarm update --autolock=true # this will generate a token
+   docker swarm unlock #enter the token when prompted other docker swarm remains unlocked 
+   #state and can'r see any running services.
+
+   #We can change the token also using thr rotate option
+    docker swarm unlock-key --rotate
+
+   #To remove autolocking 
+    docker swarm update --autolock=false
+
+  Swarm Mangers maintain the consistent state of the cluster
+   - should maintain odd no. of managers to support node failures.
+   - quorum of manager should always be odd no.
+   - A 'n' manager cluster falu tolerance is at (n-1)/2
+  Docker recommends a max. of 7 mgr nodes per swarm.
+
+#To check docker network 
+docker network ls
+#------------------------------------------------------------------
+#NETWORK ID          NAME                DRIVER              SCOPE
+#764bfb0d468b        bridge              bridge              local
+#c72e898c5480        docker_gwbridge     bridge              local
+#86ad4bba7820        host                host                local
+#q6o1onevbwtn        ingress             overlay             swarm
+#c13ea4e57d9f        none                null                local
+#------------------------------------------------------------------
+#here swarm is runnning on overlay networks
+
+#To create overlay network 
+docker network create --driver overlay front_end_network
+docker network create --driver overlay backend_network
+
+#to run a service on different overlay networks along with replicas 
+docker service create --name webserver --network front_end_network -p 80:80 httpd:latest
+#mounting db using name volume mount
+docker service create --name mysqldb --mount type=volume, source=db-data, \
+target=/var/lib/mysql/data --network backend_network mysql:latest
+
+-------------------docker stack ------------------------------------
+#to deploy multiple services at once production level
+docker stack deploy -c docker-voting-stack.yml votingapp
+
+#-----------------docker-voting-stack.yml------------------------
+version: "3"
+services:
+  
+  redis:
+    image: redis
+    ports:
+      - "6379"
+    networks:
+      - frontend
+    deploy: 
+      replicas: 2
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+    
+  db: 
+    image: postgres:9.4
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - backend
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+       
+  vote:
+    image: dockersamples/examplevotingapp_vote:before
+    ports:
+      - 5000:80
+    networks:
+      - frontend
+    depends_on:
+      - redis
+    deploy:
+      replicas: 2
+      update_config: 
+        parallelism: 2
+      restart_policy: 
+        condition: on-failure
+    
+  result:
+    image: dockersamples/examplevotingapp_result:before
+    ports:
+      - 5001:80
+    networks:
+      - backend
+    depends_on:
+      - db
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+         
+  worker:
+    image: dockersamples/examplevotingapp_worker
+    networks:
+      - frontend
+      - backend
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels: [APP=VOTING]
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints: [node.role == manager]
+        
+networks:
+  frontend:
+    driver: overlay
+  backend:
+    driver: overlay
+    
+volumes:
+  db-data:
+#-----------------------------------------------------------------------------
+
+=======================docker secrets===============================
+#adding notes in future
+====================================================================
+
+====================Docker Full app life cycle====================
+docker-compose up # for dev
+docker-compose up # for ci
+docker stack deploy # for prodcution
+
+========Private docker registry=================================
+#Run the regisry image
+docker container run -d -p 5000:5000 --name registry registry
+
+#Re-tag existing image and push it to your new regisrty (localhost)
+docker  tag hello-world 127.0.0.1:5000/hello-world
+docker push 127.0.0.1:5000/hello-world
+
+#Remove that image from local cache and pull it from new registry.
+docker image remove hello-world
+docker image remove 127.0.0.1:5000/hello-world
+docker pull 127.0.0.1:5000/hello-world
+
+#recreate registry using a bind mount and see how it store data.
+docker container run -d -p 5000:5000 --name registry -v $(pwd)/registry-data:var/lib/registry registry
+
+
+
+
+#tasks
+docker run -d --name=wordpress --link db:db -p 8085:80 wordpress
+#data_backup
+docker run -v /opt/data:/var/lib/mysql -d --name mysql-db -e MYSQL_ROOT_PASSWORD=db_pass123 mysql
+
+
+
+#Create a new network named wp-mysql-network using the bridge driver. Allocate subnet 182.18.0.1/24. Configure Gateway 182.18.0.1
+
+docker network create --driver bridge --subnet 182.18.0.1/24 --gateway 182.18.0.1 wp-mysql-network
+
+#Deploy a web application named webapp, using image kodekloud/simple-webapp-mysql. Expose port to 38080 on the host. The application takes an environment variable DB_Host that has the hostname of the mysql database. Make sure to attach it to the newly created network wp-mysql-network
+
+docker run --network=wp-mysql-network -e DB_Host=mysql-db -e DB_Password=db_pass123 -p 38080:8080 --name webapp --link mysql-db:mysql-db -d kodekloud/simple-webapp-mysql
