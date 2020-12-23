@@ -2,7 +2,7 @@
 #### This repo is continuously updated with latest tools and technologies. Just follow it.
 ###### This is now updated with DevOps related Stuff!! 
 ----------------
-### About Me:  princeanurag2011 :)
+### About Me:  devopscentre@gmail.com #devopscentre https://www.devopscentre.com :)
 --------------------------------
 
 |USER INTERFACE   |                     |
